@@ -210,7 +210,7 @@ export default function ClientesList() {
                 <label className="text-xs font-medium text-muted-foreground">Crédito</label>
                 <Select value={creditoFilter} onValueChange={setCreditoFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                   <SelectContent position="popper">
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="con">Con crédito</SelectItem>
                     <SelectItem value="sin">Sin crédito</SelectItem>
