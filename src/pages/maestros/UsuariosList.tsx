@@ -172,7 +172,7 @@ export default function UsuariosList() {
           <h2 className="text-2xl font-bold text-foreground">Usuarios</h2>
           <p className="text-sm text-muted-foreground">Gestión de usuarios y permisos del sistema</p>
         </div>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => setSheetOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Nuevo Usuario
         </Button>
