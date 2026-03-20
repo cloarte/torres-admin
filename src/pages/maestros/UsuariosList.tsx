@@ -143,6 +143,7 @@ export default function UsuariosList() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const filteredData = mockUsers.filter((u) => {
     if (roleFilter !== "all" && u.role !== roleFilter) return false;
