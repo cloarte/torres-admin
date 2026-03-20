@@ -16,15 +16,16 @@ import RutaClientes from "@/pages/maestros/RutaClientes";
 import RutaProgramacion from "@/pages/maestros/RutaProgramacion";
 import BeneficiariosList from "@/pages/maestros/BeneficiariosList";
 import Configuracion from "@/pages/maestros/Configuracion";
+import PreciosCanalPage from "@/pages/pricing/PreciosCanalPage";
+import PreciosEspecialesPage from "@/pages/pricing/PreciosEspecialesPage";
+import DescuentosCondicionPage from "@/pages/pricing/DescuentosCondicionPage";
+import CotizacionesListPage from "@/pages/pricing/CotizacionesListPage";
+import CotizacionNuevaPage from "@/pages/pricing/CotizacionNuevaPage";
+import ReportesPreciosPage from "@/pages/pricing/ReportesPreciosPage";
+import SyncErpPage from "@/pages/pricing/SyncErpPage";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
-
-const PlaceholderPage = ({ title }: { title: string }) => (
-  <div className="flex h-64 items-center justify-center rounded-lg border border-dashed border-border">
-    <p className="text-muted-foreground">Módulo <strong>{title}</strong> — próximamente</p>
-  </div>
-);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -49,12 +50,13 @@ const App = () => (
             <Route path="/maestros/beneficiarios" element={<BeneficiariosList />} />
             <Route path="/maestros/configuracion" element={<Configuracion />} />
             {/* PRICING */}
-            <Route path="/pricing/precios-canal" element={<PlaceholderPage title="Precios por Canal" />} />
-            <Route path="/pricing/precios-especiales" element={<PlaceholderPage title="Precios Especiales" />} />
-            <Route path="/pricing/descuentos" element={<PlaceholderPage title="Descuentos Condición" />} />
-            <Route path="/pricing/cotizaciones" element={<PlaceholderPage title="Cotizaciones" />} />
-            <Route path="/pricing/reportes" element={<PlaceholderPage title="Reportes" />} />
-            <Route path="/pricing/sync-erp" element={<PlaceholderPage title="Sync ERP" />} />
+            <Route path="/pricing/precios-canal" element={<PreciosCanalPage />} />
+            <Route path="/pricing/precios-especiales" element={<PreciosEspecialesPage />} />
+            <Route path="/pricing/descuentos" element={<DescuentosCondicionPage />} />
+            <Route path="/pricing/cotizaciones" element={<CotizacionesListPage />} />
+            <Route path="/pricing/cotizaciones/nueva" element={<CotizacionNuevaPage />} />
+            <Route path="/pricing/reportes" element={<ReportesPreciosPage />} />
+            <Route path="/pricing/sync-erp" element={<SyncErpPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
