@@ -295,6 +295,14 @@ export default function UsuariosList() {
           </div>
         </div>
       </div>
+
+      <UserFormSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        onSave={() => {
+          toast.success("Usuario creado exitosamente");
+        }}
+      />
     </div>
   );
 }
