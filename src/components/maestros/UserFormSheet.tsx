@@ -95,9 +95,10 @@ export function UserFormSheet({ open, onOpenChange, onSave }: UserFormSheetProps
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[480px] sm:max-w-[480px] overflow-y-auto">
+      <SheetContent className="w-[480px] sm:max-w-[480px] overflow-y-auto" aria-describedby="user-form-desc">
         <SheetHeader>
           <SheetTitle>Nuevo Usuario</SheetTitle>
+          <p id="user-form-desc" className="text-sm text-muted-foreground">Completa los datos del nuevo usuario</p>
         </SheetHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
