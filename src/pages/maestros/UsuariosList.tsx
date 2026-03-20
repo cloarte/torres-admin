@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { UserFormSheet } from "@/components/maestros/UserFormSheet";
+import { toast } from "sonner";
 import {
   useReactTable,
   getCoreRowModel,
@@ -141,6 +143,7 @@ export default function UsuariosList() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const filteredData = mockUsers.filter((u) => {
     if (roleFilter !== "all" && u.role !== roleFilter) return false;
@@ -169,7 +172,7 @@ export default function UsuariosList() {
           <h2 className="text-2xl font-bold text-foreground">Usuarios</h2>
           <p className="text-sm text-muted-foreground">Gestión de usuarios y permisos del sistema</p>
         </div>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => setSheetOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Nuevo Usuario
         </Button>
@@ -292,6 +295,14 @@ export default function UsuariosList() {
           </div>
         </div>
       </div>
+
+      <UserFormSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        onSave={() => {
+          toast.success("Usuario creado exitosamente");
+        }}
+      />
     </div>
   );
 }
