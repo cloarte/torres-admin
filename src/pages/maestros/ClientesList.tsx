@@ -300,7 +300,7 @@ export default function ClientesList() {
                   <FormLabel>Días de crédito</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Selecciona" /></SelectTrigger></FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       <SelectItem value="0">Pago inmediato</SelectItem>
                       <SelectItem value="15">15 días</SelectItem>
                       <SelectItem value="30">30 días</SelectItem>

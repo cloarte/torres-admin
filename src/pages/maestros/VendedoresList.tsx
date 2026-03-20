@@ -274,7 +274,7 @@ export default function VendedoresList() {
                     <FormLabel>Ruta</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl><SelectTrigger><SelectValue placeholder="Selecciona ruta" /></SelectTrigger></FormControl>
-                      <SelectContent>
+                      <SelectContent position="popper">
                         <SelectItem value="LIM-01">Ruta LIM-01</SelectItem>
                         <SelectItem value="LIM-02">Ruta LIM-02</SelectItem>
                         <SelectItem value="PRV-01">Ruta PRV-01</SelectItem>

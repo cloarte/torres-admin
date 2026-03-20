@@ -251,7 +251,7 @@ export default function ProductosList() {
                   <FormLabel>Línea *</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Selecciona línea" /></SelectTrigger></FormControl>
-                    <SelectContent>{LINEAS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
+                    <SelectContent position="popper">{LINEAS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
