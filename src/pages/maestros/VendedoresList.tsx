@@ -170,7 +170,7 @@ export default function VendedoresList() {
                 <label className="text-xs font-medium text-muted-foreground">Canal</label>
                 <Select value={canalFilter} onValueChange={setCanalFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                   <SelectContent position="popper">
                     <SelectItem value="all">Todos</SelectItem>
                     {CANALES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
