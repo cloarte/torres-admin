@@ -233,7 +233,7 @@ export default function VendedoresList() {
                   <FormLabel>Usuario (rol Vendedor) *</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Selecciona usuario" /></SelectTrigger></FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       <SelectItem value="Juan López">Juan López</SelectItem>
                       <SelectItem value="Pedro Soto">Pedro Soto</SelectItem>
                       <SelectItem value="María Torres">María Torres</SelectItem>
