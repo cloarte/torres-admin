@@ -199,7 +199,7 @@ export default function ClientesList() {
                 <label className="text-xs font-medium text-muted-foreground">Estado</label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                   <SelectContent position="popper">
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="ACTIVO">Activo</SelectItem>
                     <SelectItem value="INACTIVO">Inactivo</SelectItem>
