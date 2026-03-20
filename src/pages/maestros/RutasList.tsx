@@ -220,7 +220,7 @@ export default function RutasList() {
                   <FormLabel>Zona *</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Selecciona zona" /></SelectTrigger></FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       <SelectItem value="Lima">Lima</SelectItem>
                       <SelectItem value="Provincias">Provincias</SelectItem>
                     </SelectContent>
