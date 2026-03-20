@@ -209,7 +209,7 @@ export default function UsuariosList() {
                   <label className="text-xs font-medium text-muted-foreground">Rol</label>
                   <Select value={roleFilter} onValueChange={setRoleFilter}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="ADMIN">Admin</SelectItem>
                       <SelectItem value="VENDEDOR">Vendedor</SelectItem>
