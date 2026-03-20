@@ -140,7 +140,7 @@ export default function RutaClientes() {
           <div className="space-y-4">
             <Select value={selectedCliente} onValueChange={setSelectedCliente}>
               <SelectTrigger><SelectValue placeholder="Selecciona un cliente" /></SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 <SelectItem value="Distribuidora Lima">Distribuidora Lima</SelectItem>
                 <SelectItem value="Panadería Central">Panadería Central</SelectItem>
               </SelectContent>

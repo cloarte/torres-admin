@@ -160,7 +160,7 @@ export function UserFormSheet({ open, onOpenChange, onSave }: UserFormSheetProps
                     <FormControl>
                       <SelectTrigger><SelectValue placeholder="Selecciona un rol" /></SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       {ROLES.map((r) => (
                         <SelectItem key={r} value={r}>{r}</SelectItem>
                       ))}

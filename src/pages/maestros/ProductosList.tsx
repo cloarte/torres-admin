@@ -179,7 +179,7 @@ export default function ProductosList() {
                 <label className="text-xs font-medium text-muted-foreground">Línea</label>
                 <Select value={lineaFilter} onValueChange={setLineaFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                   <SelectContent position="popper">
                     <SelectItem value="all">Todas</SelectItem>
                     {LINEAS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
                   </SelectContent>
@@ -189,7 +189,7 @@ export default function ProductosList() {
                 <label className="text-xs font-medium text-muted-foreground">Estado</label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                   <SelectContent position="popper">
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="ACTIVO">Activo</SelectItem>
                     <SelectItem value="INACTIVO">Inactivo</SelectItem>
@@ -251,7 +251,7 @@ export default function ProductosList() {
                   <FormLabel>Línea *</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Selecciona línea" /></SelectTrigger></FormControl>
-                    <SelectContent>{LINEAS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
+                    <SelectContent position="popper">{LINEAS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>

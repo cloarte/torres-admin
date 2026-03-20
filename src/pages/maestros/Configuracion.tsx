@@ -84,7 +84,7 @@ export default function Configuracion() {
             <Field label="Día de notificación semanal">
               <Select value={config.diaNotificacion} onValueChange={(v) => update("diaNotificacion", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper">
                   {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"].map((d) => (
                     <SelectItem key={d} value={d}>{d}</SelectItem>
                   ))}

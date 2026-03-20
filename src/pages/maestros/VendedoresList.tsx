@@ -170,7 +170,7 @@ export default function VendedoresList() {
                 <label className="text-xs font-medium text-muted-foreground">Canal</label>
                 <Select value={canalFilter} onValueChange={setCanalFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                   <SelectContent position="popper">
                     <SelectItem value="all">Todos</SelectItem>
                     {CANALES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
@@ -180,7 +180,7 @@ export default function VendedoresList() {
                 <label className="text-xs font-medium text-muted-foreground">Estado</label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                   <SelectContent position="popper">
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="ACTIVO">Activo</SelectItem>
                     <SelectItem value="INACTIVO">Inactivo</SelectItem>
@@ -233,7 +233,7 @@ export default function VendedoresList() {
                   <FormLabel>Usuario (rol Vendedor) *</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Selecciona usuario" /></SelectTrigger></FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       <SelectItem value="Juan López">Juan López</SelectItem>
                       <SelectItem value="Pedro Soto">Pedro Soto</SelectItem>
                       <SelectItem value="María Torres">María Torres</SelectItem>
@@ -274,7 +274,7 @@ export default function VendedoresList() {
                     <FormLabel>Ruta</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl><SelectTrigger><SelectValue placeholder="Selecciona ruta" /></SelectTrigger></FormControl>
-                      <SelectContent>
+                      <SelectContent position="popper">
                         <SelectItem value="LIM-01">Ruta LIM-01</SelectItem>
                         <SelectItem value="LIM-02">Ruta LIM-02</SelectItem>
                         <SelectItem value="PRV-01">Ruta PRV-01</SelectItem>

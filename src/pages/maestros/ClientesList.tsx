@@ -189,7 +189,7 @@ export default function ClientesList() {
                 <label className="text-xs font-medium text-muted-foreground">Canal</label>
                 <Select value={canalFilter} onValueChange={setCanalFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                   <SelectContent position="popper">
                     <SelectItem value="all">Todos</SelectItem>
                     {CANALES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
@@ -199,7 +199,7 @@ export default function ClientesList() {
                 <label className="text-xs font-medium text-muted-foreground">Estado</label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                   <SelectContent position="popper">
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="ACTIVO">Activo</SelectItem>
                     <SelectItem value="INACTIVO">Inactivo</SelectItem>
@@ -210,7 +210,7 @@ export default function ClientesList() {
                 <label className="text-xs font-medium text-muted-foreground">Crédito</label>
                 <Select value={creditoFilter} onValueChange={setCreditoFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                   <SelectContent position="popper">
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="con">Con crédito</SelectItem>
                     <SelectItem value="sin">Sin crédito</SelectItem>
@@ -270,7 +270,7 @@ export default function ClientesList() {
                     <FormLabel>Canal *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl><SelectTrigger><SelectValue placeholder="Selecciona" /></SelectTrigger></FormControl>
-                      <SelectContent>{CANALES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                      <SelectContent position="popper">{CANALES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
@@ -300,7 +300,7 @@ export default function ClientesList() {
                   <FormLabel>Días de crédito</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Selecciona" /></SelectTrigger></FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       <SelectItem value="0">Pago inmediato</SelectItem>
                       <SelectItem value="15">15 días</SelectItem>
                       <SelectItem value="30">30 días</SelectItem>
