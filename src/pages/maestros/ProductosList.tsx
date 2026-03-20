@@ -179,7 +179,7 @@ export default function ProductosList() {
                 <label className="text-xs font-medium text-muted-foreground">Línea</label>
                 <Select value={lineaFilter} onValueChange={setLineaFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                   <SelectContent position="popper">
                     <SelectItem value="all">Todas</SelectItem>
                     {LINEAS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
                   </SelectContent>
