@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -93,7 +93,7 @@ const lineaSchema = z.object({
   estado: z.string().min(1, "Requerido"),
 });
 
-type LineaForm = z.infer<typeof lineaSchema>;
+type LineaFormValues = z.infer<typeof lineaSchema>;
 
 export default function LineasList() {
   const [lineas, setLineas] = useState<Linea[]>(initialLineas);
@@ -106,13 +106,13 @@ export default function LineasList() {
     getPaginationRowModel: getPaginationRowModel(), initialState: { pagination: { pageSize: 20 } },
   });
 
-  const form = useForm<LineaForm>({
+  const form = useForm<LineaFormValues>({
     resolver: zodResolver(lineaSchema),
     defaultValues: { nombre: "", descripcion: "", estado: "ACTIVO" },
     mode: "onChange",
   });
 
-  const onSubmit = (data: LineaForm) => {
+  const onSubmit = (data: LineaFormValues) => {
     setLineas(prev => [...prev, {
       id: prev.length + 1,
       nombre: data.nombre,
@@ -165,42 +165,40 @@ export default function LineasList() {
         </div>
       </div>
 
-      <Dialog open={dialogOpen} onOpenChange={(v) => setDialogOpen(v)}>
-        <DialogContent className="sm:max-w-md z-[9999]">
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Nueva Línea de Producto</DialogTitle>
+            <DialogDescription>Crea una nueva categoría para agrupar productos.</DialogDescription>
+          </DialogHeader>
           {dialogOpen && (
-            <>
-              <DialogHeader>
-                <DialogTitle>Nueva Línea de Producto</DialogTitle>
-                <DialogDescription>Crea una nueva categoría para agrupar productos.</DialogDescription>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField control={form.control} name="nombre" render={({ field }) => (
-                    <FormItem><FormLabel>Nombre *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                  <FormField control={form.control} name="descripcion" render={({ field }) => (
-                    <FormItem><FormLabel>Descripción</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                  <FormField control={form.control} name="estado" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado *</FormLabel>
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
-                        <SelectContent position="popper" className="z-[9999]">
-                          <SelectItem value="ACTIVO">ACTIVO</SelectItem>
-                          <SelectItem value="INACTIVO">INACTIVO</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-                    <Button type="submit" disabled={!form.formState.isValid}>Guardar</Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField control={form.control} name="nombre" render={({ field }) => (
+                  <FormItem><FormLabel>Nombre *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="descripcion" render={({ field }) => (
+                  <FormItem><FormLabel>Descripción</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="estado" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Estado *</FormLabel>
+                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
+                      <SelectContent position="popper" className="z-[9999]">
+                        <SelectItem value="ACTIVO">ACTIVO</SelectItem>
+                        <SelectItem value="INACTIVO">INACTIVO</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+                  <Button type="submit" disabled={!form.formState.isValid}>Guardar</Button>
+                </DialogFooter>
+              </form>
+            </Form>
           )}
         </DialogContent>
       </Dialog>

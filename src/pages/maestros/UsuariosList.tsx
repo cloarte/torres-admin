@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { UserFormSheet } from "@/components/maestros/UserFormSheet";
 import { toast } from "sonner";
 import {
   useReactTable, getCoreRowModel, getFilteredRowModel, getPaginationRowModel,
@@ -13,6 +12,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter,
+} from "@/components/ui/sheet";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 interface User {
   id: number;
@@ -115,6 +121,18 @@ const columns = [
   }),
 ];
 
+const ROLES = ["ADMIN", "GERENTE_GENERAL", "ALMACEN", "CONSOLIDADOR", "VENDEDOR", "INSPECTOR", "CAJERO"] as const;
+
+const userSchema = z.object({
+  nombre: z.string().min(3, "Mínimo 3 caracteres"),
+  email: z.string().email("Email inválido"),
+  password: z.string().min(8, "Mínimo 8 caracteres"),
+  rol: z.string().min(1, "Selecciona un rol"),
+  estado: z.string().min(1, "Selecciona un estado"),
+});
+
+type UserFormValues = z.infer<typeof userSchema>;
+
 export default function UsuariosList() {
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -139,9 +157,27 @@ export default function UsuariosList() {
     initialState: { pagination: { pageSize: 20 } },
   });
 
-  const activeFilters = (roleFilter !== "all" ? 1 : 0) + (statusFilter !== "all" ? 1 : 0);
+  const form = useForm<UserFormValues>({
+    resolver: zodResolver(userSchema),
+    defaultValues: { nombre: "", email: "", password: "", rol: "", estado: "ACTIVO" },
+    mode: "onChange",
+  });
 
-  console.log("[DEBUG] UsuariosPage rendered, sheetOpen:", sheetOpen);
+  const onSubmit = (data: UserFormValues) => {
+    setUsers(prev => [...prev, {
+      id: prev.length + 1,
+      name: data.nombre,
+      email: data.email,
+      role: data.rol,
+      status: data.estado as "ACTIVO" | "INACTIVO",
+      lastAccess: "ahora",
+    }]);
+    toast.success("Usuario creado exitosamente");
+    setSheetOpen(false);
+    form.reset();
+  };
+
+  const activeFilters = (roleFilter !== "all" ? 1 : 0) + (statusFilter !== "all" ? 1 : 0);
 
   return (
     <div className="space-y-6">
@@ -150,27 +186,10 @@ export default function UsuariosList() {
           <h2 className="text-2xl font-bold text-foreground">Usuarios</h2>
           <p className="text-sm text-muted-foreground">Gestión de usuarios y permisos del sistema</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            className="border-destructive text-destructive"
-            onClick={() => alert("TEST: onClick funciona")}
-          >
-            TEST CLICK
-          </Button>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => {
-            try {
-              console.log("[DEBUG] Nuevo Usuario button clicked");
-              setSheetOpen(true);
-            } catch (err) {
-              console.error("Button click error:", err);
-              toast.error(`Error al abrir: ${err instanceof Error ? err.message : String(err)}`);
-            }
-          }}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nuevo Usuario
-          </Button>
-        </div>
+        <Button onClick={() => setSheetOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Nuevo Usuario
+        </Button>
       </div>
 
       <div className="rounded-lg border border-border bg-card shadow-sm">
@@ -263,21 +282,58 @@ export default function UsuariosList() {
         </div>
       </div>
 
-      <UserFormSheet
-        open={sheetOpen}
-        onOpenChange={(v) => setSheetOpen(v)}
-        onSave={(data) => {
-          setUsers(prev => [...prev, {
-            id: prev.length + 1,
-            name: data.nombre,
-            email: data.email,
-            role: data.rol,
-            status: data.estado as "ACTIVO" | "INACTIVO",
-            lastAccess: "ahora",
-          }]);
-          toast.success("Usuario creado exitosamente");
-        }}
-      />
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent side="right" className="w-[480px] sm:max-w-[480px] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Nuevo Usuario</SheetTitle>
+            <SheetDescription>Completa los datos del nuevo usuario</SheetDescription>
+          </SheetHeader>
+          {sheetOpen && (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
+                <FormField control={form.control} name="nombre" render={({ field }) => (
+                  <FormItem><FormLabel>Nombre completo *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="email" render={({ field }) => (
+                  <FormItem><FormLabel>Email *</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="password" render={({ field }) => (
+                  <FormItem><FormLabel>Contraseña *</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="rol" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Rol *</FormLabel>
+                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar rol..." /></SelectTrigger></FormControl>
+                      <SelectContent position="popper" className="z-[9999]">
+                        {ROLES.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="estado" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Estado *</FormLabel>
+                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar estado..." /></SelectTrigger></FormControl>
+                      <SelectContent position="popper" className="z-[9999]">
+                        <SelectItem value="ACTIVO">ACTIVO</SelectItem>
+                        <SelectItem value="INACTIVO">INACTIVO</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <SheetFooter className="pt-4 gap-2">
+                  <Button type="button" variant="outline" onClick={() => setSheetOpen(false)}>Cancelar</Button>
+                  <Button type="submit" disabled={!form.formState.isValid}>Guardar</Button>
+                </SheetFooter>
+              </form>
+            </Form>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
