@@ -126,7 +126,7 @@ export default function ClientesList() {
   const [canalFilter, setCanalFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [creditoFilter, setCreditoFilter] = useState("all");
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
   const filteredData = clientes.filter((c) => {
     if (canalFilter !== "all" && c.canal !== canalFilter) return false;
