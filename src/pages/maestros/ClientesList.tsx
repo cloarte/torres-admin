@@ -59,7 +59,7 @@ type Cliente = {
   estado: "ACTIVO" | "INACTIVO";
 };
 
-const INITIAL_CLIENTES: Cliente[] = [
+export const mockClientes: Cliente[] = [
   { id: 1, razonSocial: "Supermercados Plaza", ruc: "20512345678", canal: "Moderno", direccion: "Av. Javier Prado 1234", telefono: "01-4567890", email: "compras@plaza.com", diasCredito: "30", tienePortal: true, estado: "ACTIVO" },
   { id: 2, razonSocial: "Bodega San Martín", ruc: "10234567890", canal: "Tradicional", direccion: "Jr. San Martín 456", telefono: "987654321", email: "", diasCredito: "0", tienePortal: false, estado: "ACTIVO" },
   { id: 3, razonSocial: "Distribuidora Lima", ruc: "20387654321", canal: "Directa", direccion: "Av. Argentina 789", telefono: "01-3456789", email: "lima@distrib.com", diasCredito: "15", tienePortal: true, estado: "ACTIVO" },
