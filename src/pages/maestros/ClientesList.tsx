@@ -8,8 +8,6 @@ import { Search, Plus, Filter, MoreHorizontal, Building2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -87,7 +85,7 @@ const columns = [
   }),
   columnHelper.accessor("diasCredito", {
     header: "Días crédito",
-    cell: (info) => <span className="text-sm">{info.getValue() === 0 ? "Pago inmediato" : `${info.getValue()} días`}</span>,
+    cell: (info) => <span className="text-sm">{info.getValue() === 0 ? "Sin crédito" : `${info.getValue()} días`}</span>,
   }),
   columnHelper.accessor("portalAccess", {
     header: "Portal",
@@ -113,26 +111,24 @@ const clienteSchema = z.object({
   razonSocial: z.string().min(1, "Requerido").max(200),
   ruc: z.string().regex(/^\d{11}$/, "El RUC debe tener 11 dígitos"),
   canal: z.string().min(1, "Selecciona un canal"),
-  direccion: z.string().min(1, "Requerido").max(300),
+  direccion: z.string().max(300).optional().or(z.literal("")),
   telefono: z.string().max(20).optional().or(z.literal("")),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
-  contactoNombre: z.string().max(100).optional().or(z.literal("")),
-  contactoCargo: z.string().max(100).optional().or(z.literal("")),
   diasCredito: z.string().min(1, "Selecciona"),
-  observaciones: z.string().max(500).optional().or(z.literal("")),
-  activo: z.boolean(),
+  estado: z.string().min(1, "Requerido"),
 });
 
 type ClienteForm = z.infer<typeof clienteSchema>;
 
 export default function ClientesList() {
+  const [clientes, setClientes] = useState<Cliente[]>(mockClientes);
   const [globalFilter, setGlobalFilter] = useState("");
   const [canalFilter, setCanalFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [creditoFilter, setCreditoFilter] = useState("all");
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const filteredData = mockClientes.filter((c) => {
+  const filteredData = clientes.filter((c) => {
     if (canalFilter !== "all" && c.canal !== canalFilter) return false;
     if (statusFilter !== "all" && c.status !== statusFilter) return false;
     if (creditoFilter === "con" && c.diasCredito === 0) return false;
@@ -148,12 +144,26 @@ export default function ClientesList() {
 
   const form = useForm<ClienteForm>({
     resolver: zodResolver(clienteSchema),
-    defaultValues: { razonSocial: "", ruc: "", canal: "", direccion: "", telefono: "", email: "", contactoNombre: "", contactoCargo: "", diasCredito: "", observaciones: "", activo: true },
-    mode: "onBlur",
+    defaultValues: { razonSocial: "", ruc: "", canal: "", direccion: "", telefono: "", email: "", diasCredito: "0", estado: "ACTIVO" },
+    mode: "onChange",
   });
 
   const onSubmit = (data: ClienteForm) => {
-    console.log(data);
+    setClientes(prev => [...prev, {
+      id: prev.length + 1,
+      razonSocial: data.razonSocial,
+      ruc: data.ruc,
+      canal: data.canal,
+      diasCredito: parseInt(data.diasCredito),
+      portalAccess: false,
+      status: data.estado as "ACTIVO" | "INACTIVO",
+      direccion: data.direccion || "",
+      telefono: data.telefono || "",
+      email: data.email || "",
+      contactoNombre: "",
+      contactoCargo: "",
+      observaciones: "",
+    }]);
     toast.success("Cliente creado exitosamente");
     setSheetOpen(false);
     form.reset();
@@ -189,7 +199,7 @@ export default function ClientesList() {
                 <label className="text-xs font-medium text-muted-foreground">Canal</label>
                 <Select value={canalFilter} onValueChange={setCanalFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                   <SelectContent position="popper">
+                  <SelectContent position="popper" className="z-[9999]">
                     <SelectItem value="all">Todos</SelectItem>
                     {CANALES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
@@ -199,7 +209,7 @@ export default function ClientesList() {
                 <label className="text-xs font-medium text-muted-foreground">Estado</label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                   <SelectContent position="popper">
+                  <SelectContent position="popper" className="z-[9999]">
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="ACTIVO">Activo</SelectItem>
                     <SelectItem value="INACTIVO">Inactivo</SelectItem>
@@ -210,7 +220,7 @@ export default function ClientesList() {
                 <label className="text-xs font-medium text-muted-foreground">Crédito</label>
                 <Select value={creditoFilter} onValueChange={setCreditoFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                   <SelectContent position="popper">
+                  <SelectContent position="popper" className="z-[9999]">
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="con">Con crédito</SelectItem>
                     <SelectItem value="sin">Sin crédito</SelectItem>
@@ -252,33 +262,34 @@ export default function ClientesList() {
       </div>
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent className="w-[520px] sm:max-w-[520px] overflow-y-auto">
-          <SheetHeader><SheetTitle>Nuevo Cliente</SheetTitle></SheetHeader>
+        <SheetContent className="w-[520px] sm:max-w-[520px] overflow-y-auto" aria-describedby="cliente-form-desc">
+          <SheetHeader>
+            <SheetTitle>Nuevo Cliente</SheetTitle>
+            <p id="cliente-form-desc" className="text-sm text-muted-foreground">Completa los datos del nuevo cliente</p>
+          </SheetHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="razonSocial" render={({ field }) => (
-                  <FormItem><FormLabel>Razón social *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>Razón Social *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="ruc" render={({ field }) => (
                   <FormItem><FormLabel>RUC *</FormLabel><FormControl><Input {...field} maxLength={11} /></FormControl><FormMessage /></FormItem>
                 )} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField control={form.control} name="canal" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Canal *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Selecciona" /></SelectTrigger></FormControl>
-                      <SelectContent position="popper">{CANALES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="direccion" render={({ field }) => (
-                  <FormItem><FormLabel>Dirección *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-              </div>
+              <FormField control={form.control} name="canal" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Canal *</FormLabel>
+                  <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Selecciona canal" /></SelectTrigger></FormControl>
+                    <SelectContent position="popper" className="z-[9999]">{CANALES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="direccion" render={({ field }) => (
+                <FormItem><FormLabel>Dirección</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
               <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="telefono" render={({ field }) => (
                   <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
@@ -287,21 +298,13 @@ export default function ClientesList() {
                   <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField control={form.control} name="contactoNombre" render={({ field }) => (
-                  <FormItem><FormLabel>Contacto nombre</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <FormField control={form.control} name="contactoCargo" render={({ field }) => (
-                  <FormItem><FormLabel>Contacto cargo</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-              </div>
               <FormField control={form.control} name="diasCredito" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Días de crédito</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select value={field.value ?? ""} onValueChange={field.onChange}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Selecciona" /></SelectTrigger></FormControl>
-                    <SelectContent position="popper">
-                      <SelectItem value="0">Pago inmediato</SelectItem>
+                    <SelectContent position="popper" className="z-[9999]">
+                      <SelectItem value="0">Sin crédito</SelectItem>
                       <SelectItem value="15">15 días</SelectItem>
                       <SelectItem value="30">30 días</SelectItem>
                       <SelectItem value="60">60 días</SelectItem>
@@ -310,13 +313,17 @@ export default function ClientesList() {
                   <FormMessage />
                 </FormItem>
               )} />
-              <FormField control={form.control} name="observaciones" render={({ field }) => (
-                <FormItem><FormLabel>Observaciones</FormLabel><FormControl><Textarea {...field} rows={2} /></FormControl><FormMessage /></FormItem>
-              )} />
-              <FormField control={form.control} name="activo" render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border border-border p-3">
-                  <FormLabel className="cursor-pointer">Activo</FormLabel>
-                  <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+              <FormField control={form.control} name="estado" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado *</FormLabel>
+                  <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
+                    <SelectContent position="popper" className="z-[9999]">
+                      <SelectItem value="ACTIVO">ACTIVO</SelectItem>
+                      <SelectItem value="INACTIVO">INACTIVO</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
                 </FormItem>
               )} />
               <SheetFooter className="pt-4 gap-2">

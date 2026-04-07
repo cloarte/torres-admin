@@ -22,7 +22,6 @@ import DescuentosCondicionPage from "@/pages/pricing/DescuentosCondicionPage";
 import CotizacionesListPage from "@/pages/pricing/CotizacionesListPage";
 import CotizacionNuevaPage from "@/pages/pricing/CotizacionNuevaPage";
 import ReportesPreciosPage from "@/pages/pricing/ReportesPreciosPage";
-import SyncErpPage from "@/pages/pricing/SyncErpPage";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -56,7 +55,6 @@ const App = () => (
             <Route path="/pricing/cotizaciones" element={<CotizacionesListPage />} />
             <Route path="/pricing/cotizaciones/nueva" element={<CotizacionNuevaPage />} />
             <Route path="/pricing/reportes" element={<ReportesPreciosPage />} />
-            <Route path="/pricing/sync-erp" element={<SyncErpPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

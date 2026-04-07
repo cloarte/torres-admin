@@ -13,8 +13,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DeactivateDialog } from "@/components/maestros/DeactivateDialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,7 +28,7 @@ interface Linea {
   status: "ACTIVO" | "INACTIVO";
 }
 
-const mockLineas: Linea[] = [
+const initialLineas: Linea[] = [
   { id: 1, nombre: "Panetones", numProductos: 8, descripcion: "Panetones clásicos y especiales", status: "ACTIVO" },
   { id: 2, nombre: "Pan de Molde", numProductos: 12, descripcion: "Pan de molde en diversas presentaciones", status: "ACTIVO" },
   { id: 3, nombre: "Empanadas", numProductos: 6, descripcion: "Empanadas rellenas congeladas", status: "ACTIVO" },
@@ -91,29 +90,36 @@ const columns = [
 const lineaSchema = z.object({
   nombre: z.string().min(1, "Requerido").max(100),
   descripcion: z.string().max(300).optional().or(z.literal("")),
-  activo: z.boolean(),
+  estado: z.string().min(1, "Requerido"),
 });
 
 type LineaForm = z.infer<typeof lineaSchema>;
 
 export default function LineasList() {
+  const [lineas, setLineas] = useState<Linea[]>(initialLineas);
   const [globalFilter, setGlobalFilter] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const table = useReactTable({
-    data: mockLineas, columns, state: { globalFilter }, onGlobalFilterChange: setGlobalFilter,
+    data: lineas, columns, state: { globalFilter }, onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(), getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(), initialState: { pagination: { pageSize: 20 } },
   });
 
   const form = useForm<LineaForm>({
     resolver: zodResolver(lineaSchema),
-    defaultValues: { nombre: "", descripcion: "", activo: true },
-    mode: "onBlur",
+    defaultValues: { nombre: "", descripcion: "", estado: "ACTIVO" },
+    mode: "onChange",
   });
 
   const onSubmit = (data: LineaForm) => {
-    console.log(data);
+    setLineas(prev => [...prev, {
+      id: prev.length + 1,
+      nombre: data.nombre,
+      descripcion: data.descripcion || "",
+      numProductos: 0,
+      status: data.estado as "ACTIVO" | "INACTIVO",
+    }]);
     toast.success("Línea creada exitosamente");
     setDialogOpen(false);
     form.reset();
@@ -155,7 +161,7 @@ export default function LineasList() {
           </TableBody>
         </Table>
         <div className="flex items-center justify-between border-t border-border px-4 py-3">
-          <p className="text-sm text-muted-foreground">{mockLineas.length} línea{mockLineas.length !== 1 ? "s" : ""}</p>
+          <p className="text-sm text-muted-foreground">{lineas.length} línea{lineas.length !== 1 ? "s" : ""}</p>
         </div>
       </div>
 
@@ -171,12 +177,19 @@ export default function LineasList() {
                 <FormItem><FormLabel>Nombre *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="descripcion" render={({ field }) => (
-                <FormItem><FormLabel>Descripción</FormLabel><FormControl><Textarea {...field} rows={2} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Descripción</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
               )} />
-              <FormField control={form.control} name="activo" render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border border-border p-3">
-                  <FormLabel className="cursor-pointer">Activo</FormLabel>
-                  <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+              <FormField control={form.control} name="estado" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado *</FormLabel>
+                  <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
+                    <SelectContent position="popper" className="z-[9999]">
+                      <SelectItem value="ACTIVO">ACTIVO</SelectItem>
+                      <SelectItem value="INACTIVO">INACTIVO</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
                 </FormItem>
               )} />
               <DialogFooter>

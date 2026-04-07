@@ -1,7 +1,7 @@
 import { useLocation, Link } from "react-router-dom";
 import {
   Users, UserCheck, Package, Layers, Building2, Radio, Route, Heart, Settings,
-  DollarSign, Star, Percent, FileText, BarChart3, RefreshCw, ChevronDown
+  DollarSign, Star, Percent, FileText, BarChart3, ChevronDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -30,7 +30,6 @@ const pricingItems: MenuItem[] = [
   { title: "Descuentos Condición", url: "/pricing/descuentos", icon: Percent },
   { title: "Cotizaciones", url: "/pricing/cotizaciones", icon: FileText },
   { title: "Reportes", url: "/pricing/reportes", icon: BarChart3 },
-  { title: "Sync ERP", url: "/pricing/sync-erp", icon: RefreshCw },
 ];
 
 function SidebarSection({ title, items }: { title: string; items: MenuItem[] }) {
