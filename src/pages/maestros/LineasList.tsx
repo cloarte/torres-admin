@@ -98,7 +98,7 @@ type LineaForm = z.infer<typeof lineaSchema>;
 export default function LineasList() {
   const [lineas, setLineas] = useState<Linea[]>(initialLineas);
   const [globalFilter, setGlobalFilter] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
   const table = useReactTable({
     data: lineas, columns, state: { globalFilter }, onGlobalFilterChange: setGlobalFilter,
@@ -165,39 +165,43 @@ export default function LineasList() {
         </div>
       </div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Nueva Línea de Producto</DialogTitle>
-            <DialogDescription>Crea una nueva categoría para agrupar productos.</DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField control={form.control} name="nombre" render={({ field }) => (
-                <FormItem><FormLabel>Nombre *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-              )} />
-              <FormField control={form.control} name="descripcion" render={({ field }) => (
-                <FormItem><FormLabel>Descripción</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-              )} />
-              <FormField control={form.control} name="estado" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Estado *</FormLabel>
-                  <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
-                    <SelectContent position="popper" className="z-[9999]">
-                      <SelectItem value="ACTIVO">ACTIVO</SelectItem>
-                      <SelectItem value="INACTIVO">INACTIVO</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={!form.formState.isValid}>Guardar</Button>
-              </DialogFooter>
-            </form>
-          </Form>
+      <Dialog open={dialogOpen} onOpenChange={(v) => setDialogOpen(v)}>
+        <DialogContent className="sm:max-w-md z-[9999]">
+          {dialogOpen && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Nueva Línea de Producto</DialogTitle>
+                <DialogDescription>Crea una nueva categoría para agrupar productos.</DialogDescription>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField control={form.control} name="nombre" render={({ field }) => (
+                    <FormItem><FormLabel>Nombre *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                  <FormField control={form.control} name="descripcion" render={({ field }) => (
+                    <FormItem><FormLabel>Descripción</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                  <FormField control={form.control} name="estado" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado *</FormLabel>
+                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
+                        <SelectContent position="popper" className="z-[9999]">
+                          <SelectItem value="ACTIVO">ACTIVO</SelectItem>
+                          <SelectItem value="INACTIVO">INACTIVO</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+                    <Button type="submit" disabled={!form.formState.isValid}>Guardar</Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
