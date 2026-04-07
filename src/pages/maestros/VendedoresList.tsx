@@ -234,86 +234,77 @@ export default function VendedoresList() {
         </div>
       </div>
 
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+      <Sheet open={sheetOpen} onOpenChange={(v) => setSheetOpen(v)}>
         <SheetContent className="w-[480px] sm:max-w-[480px] overflow-y-auto" aria-describedby="vendedor-form-desc">
-          <SheetHeader>
-            <SheetTitle>Nuevo Vendedor</SheetTitle>
-            <p id="vendedor-form-desc" className="text-sm text-muted-foreground">Completa los datos del nuevo vendedor</p>
-          </SheetHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
-              <FormField control={form.control} name="nombre" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre completo *</FormLabel>
-                  <FormControl><Input {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-
-              <FormField control={form.control} name="codigo" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Código *</FormLabel>
-                  <FormControl><Input placeholder="V-001" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
-
-              <FormField control={form.control} name="canales" render={() => (
-                <FormItem>
-                  <FormLabel>Canal(es) *</FormLabel>
-                  <div className="space-y-2">
-                    {CANALES.map((canal) => (
-                      <div key={canal} className="flex items-center gap-2">
-                        <Checkbox
-                          checked={watchCanales?.includes(canal)}
-                          onCheckedChange={(checked) => {
-                            const current = form.getValues("canales");
-                            form.setValue("canales", checked ? [...current, canal] : current.filter((c) => c !== canal), { shouldValidate: true });
-                          }}
-                        />
-                        <Label className="text-sm font-normal">{canal}</Label>
+          {sheetOpen && (
+            <>
+              <SheetHeader>
+                <SheetTitle>Nuevo Vendedor</SheetTitle>
+                <p id="vendedor-form-desc" className="text-sm text-muted-foreground">Completa los datos del nuevo vendedor</p>
+              </SheetHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
+                  <FormField control={form.control} name="nombre" render={({ field }) => (
+                    <FormItem><FormLabel>Nombre completo *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                  <FormField control={form.control} name="codigo" render={({ field }) => (
+                    <FormItem><FormLabel>Código *</FormLabel><FormControl><Input placeholder="V-001" {...field} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                  <FormField control={form.control} name="canales" render={() => (
+                    <FormItem>
+                      <FormLabel>Canal(es) *</FormLabel>
+                      <div className="space-y-2">
+                        {CANALES.map((canal) => (
+                          <div key={canal} className="flex items-center gap-2">
+                            <Checkbox
+                              checked={watchCanales?.includes(canal)}
+                              onCheckedChange={(checked) => {
+                                const current = form.getValues("canales");
+                                form.setValue("canales", checked ? [...current, canal] : current.filter((c) => c !== canal), { shouldValidate: true });
+                              }}
+                            />
+                            <Label className="text-sm font-normal">{canal}</Label>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )} />
-
-              {showRuta && (
-                <FormField control={form.control} name="ruta" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ruta</FormLabel>
-                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Selecciona ruta" /></SelectTrigger></FormControl>
-                      <SelectContent position="popper" className="z-[9999]">
-                        {RUTAS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-              )}
-
-              <FormField control={form.control} name="estado" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Estado *</FormLabel>
-                  <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
-                    <SelectContent position="popper" className="z-[9999]">
-                      <SelectItem value="ACTIVO">ACTIVO</SelectItem>
-                      <SelectItem value="INACTIVO">INACTIVO</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )} />
-
-              <SheetFooter className="pt-4 gap-2">
-                <Button type="button" variant="outline" onClick={() => setSheetOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={!form.formState.isValid}>Guardar</Button>
-              </SheetFooter>
-            </form>
-          </Form>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  {showRuta && (
+                    <FormField control={form.control} name="ruta" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ruta</FormLabel>
+                        <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                          <FormControl><SelectTrigger><SelectValue placeholder="Selecciona ruta" /></SelectTrigger></FormControl>
+                          <SelectContent position="popper" className="z-[9999]">
+                            {RUTAS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  )}
+                  <FormField control={form.control} name="estado" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado *</FormLabel>
+                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
+                        <SelectContent position="popper" className="z-[9999]">
+                          <SelectItem value="ACTIVO">ACTIVO</SelectItem>
+                          <SelectItem value="INACTIVO">INACTIVO</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <SheetFooter className="pt-4 gap-2">
+                    <Button type="button" variant="outline" onClick={() => setSheetOpen(false)}>Cancelar</Button>
+                    <Button type="submit" disabled={!form.formState.isValid}>Guardar</Button>
+                  </SheetFooter>
+                </form>
+              </Form>
+            </>
+          )}
         </SheetContent>
       </Sheet>
     </div>

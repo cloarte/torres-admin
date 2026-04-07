@@ -246,7 +246,7 @@ export default function UsuariosList() {
 
       <UserFormSheet
         open={sheetOpen}
-        onOpenChange={setSheetOpen}
+        onOpenChange={(v) => setSheetOpen(v)}
         onSave={(data) => {
           setUsers(prev => [...prev, {
             id: prev.length + 1,
