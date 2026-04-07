@@ -85,7 +85,7 @@ export default function ClienteDetail() {
               <InfoRow label="Teléfono" value={cliente.telefono} />
               <InfoRow label="Email" value={cliente.email} />
               <InfoRow label="Contacto" value={`${cliente.contactoNombre} — ${cliente.contactoCargo}`} />
-              <InfoRow label="Días de crédito" value={cliente.diasCredito === 0 ? "Pago inmediato" : `${cliente.diasCredito} días`} />
+              <InfoRow label="Días de crédito" value={cliente.diasCredito === "0" ? "Pago inmediato" : `${cliente.diasCredito} días`} />
               <InfoRow label="Observaciones" value={cliente.observaciones || "Sin observaciones"} />
             </CardContent>
           </Card>
