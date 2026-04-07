@@ -1,305 +1,326 @@
 import { useState } from "react";
-import {
-  useReactTable, getCoreRowModel, getFilteredRowModel, getPaginationRowModel,
-  flexRender, createColumnHelper,
-} from "@tanstack/react-table";
-import { Search, Plus, Filter, MoreHorizontal, MapPin } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { DeactivateDialog } from "@/components/maestros/DeactivateDialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-interface Vendedor {
+// ── Data ──────────────────────────────────────────────
+const CANALES = ["Corporativo", "Moderno", "Tradicional", "Directa"] as const;
+
+const RUTAS = [
+  { id: "LIM-01", nombre: "Miraflores - San Isidro", canal: "Tradicional" },
+  { id: "LIM-02", nombre: "La Victoria - Cercado", canal: "Tradicional" },
+  { id: "LIM-03", nombre: "San Borja - Surco", canal: "Tradicional" },
+  { id: "PRV-01", nombre: "Arequipa Centro", canal: "Tradicional" },
+  { id: "PRV-02", nombre: "Trujillo Norte", canal: "Tradicional" },
+  { id: "MOD-01", nombre: "Plaza Vea Lima Norte", canal: "Moderno" },
+  { id: "MOD-02", nombre: "Wong Miraflores", canal: "Moderno" },
+  { id: "DIR-01", nombre: "Distribuidores Lima Este", canal: "Directa" },
+];
+
+const CANAL_COLORS: Record<string, string> = {
+  Tradicional: "bg-amber-100 text-amber-700",
+  Moderno: "bg-blue-100 text-blue-700",
+  Corporativo: "bg-purple-100 text-purple-700",
+  Directa: "bg-green-100 text-green-700",
+};
+
+type Vendedor = {
   id: number;
   nombre: string;
   codigo: string;
+  email: string;
   canales: string[];
-  ruta: string | null;
-  status: "ACTIVO" | "INACTIVO";
-}
+  rutas: string[];
+  estado: "ACTIVO" | "INACTIVO";
+};
 
-const initialVendedores: Vendedor[] = [
-  { id: 1, nombre: "Juan López", codigo: "V-001", canales: ["Tradicional"], ruta: "LIM-01 Miraflores-San Isidro", status: "ACTIVO" },
-  { id: 2, nombre: "Pedro Soto", codigo: "V-002", canales: ["Moderno", "Corporativo"], ruta: null, status: "ACTIVO" },
-  { id: 3, nombre: "María Torres", codigo: "V-003", canales: ["Tradicional"], ruta: "PRV-01 Arequipa Centro", status: "ACTIVO" },
+const INITIAL_VENDEDORES: Vendedor[] = [
+  { id: 1, nombre: "Juan López", codigo: "V-001", email: "jlopez@torres.com", canales: ["Tradicional"], rutas: ["LIM-01"], estado: "ACTIVO" },
+  { id: 2, nombre: "Pedro Soto", codigo: "V-002", email: "psoto@torres.com", canales: ["Moderno", "Corporativo"], rutas: ["MOD-01"], estado: "ACTIVO" },
+  { id: 3, nombre: "María Torres", codigo: "V-003", email: "mtorres@torres.com", canales: ["Tradicional"], rutas: ["PRV-01", "PRV-02"], estado: "ACTIVO" },
 ];
 
-const CANALES = ["Corporativo", "Moderno", "Tradicional", "Directa"];
-const RUTAS = [
-  "LIM-01 Miraflores-San Isidro",
-  "LIM-02 La Victoria-Cercado",
-  "PRV-01 Arequipa Centro",
-];
-
-const columnHelper = createColumnHelper<Vendedor>();
-const columns = [
-  columnHelper.accessor("nombre", {
-    header: "Nombre",
-    cell: (info) => <span className="font-medium text-foreground">{info.getValue()}</span>,
-  }),
-  columnHelper.accessor("codigo", { header: "Código" }),
-  columnHelper.accessor("canales", {
-    header: "Canales",
-    cell: (info) => (
-      <div className="flex gap-1 flex-wrap">
-        {info.getValue().map((c) => <Badge key={c} variant="secondary" className="text-[11px]">{c}</Badge>)}
-      </div>
-    ),
-  }),
-  columnHelper.accessor("ruta", {
-    header: "Ruta",
-    cell: (info) => info.getValue() ? (
-      <span className="flex items-center gap-1 text-sm"><MapPin className="h-3.5 w-3.5 text-muted-foreground" />{info.getValue()}</span>
-    ) : <span className="text-muted-foreground">—</span>,
-  }),
-  columnHelper.accessor("status", {
-    header: "Estado",
-    cell: (info) => (
-      <Badge variant={info.getValue() === "ACTIVO" ? "default" : "secondary"}
-        className={info.getValue() === "ACTIVO" ? "bg-success/10 text-success border border-success/20" : "bg-destructive/10 text-destructive border border-destructive/20"}>
-        <span className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${info.getValue() === "ACTIVO" ? "bg-success" : "bg-destructive"}`} />
-        {info.getValue()}
-      </Badge>
-    ),
-  }),
-  columnHelper.display({
-    id: "actions",
-    header: "",
-    cell: ({ row }) => <ActionsCell vendedor={row.original} />,
-  }),
-];
-
-function ActionsCell({ vendedor }: { vendedor: Vendedor }) {
-  const [showDeactivate, setShowDeactivate] = useState(false);
-  return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem>Editar</DropdownMenuItem>
-          <DropdownMenuItem className="text-destructive" onClick={() => setShowDeactivate(true)}>Desactivar</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <DeactivateDialog open={showDeactivate} onOpenChange={setShowDeactivate}
-        title={`¿Desactivar a ${vendedor.nombre}?`}
-        onConfirm={() => { toast.success("Vendedor desactivado"); setShowDeactivate(false); }} />
-    </>
-  );
-}
-
-const vendedorSchema = z.object({
-  nombre: z.string().min(3, "Mínimo 3 caracteres"),
-  codigo: z.string().min(1, "Requerido"),
+// ── Schema ────────────────────────────────────────────
+const schema = z.object({
   canales: z.array(z.string()).min(1, "Selecciona al menos un canal"),
-  ruta: z.string().optional(),
-  estado: z.string().min(1, "Requerido"),
+  rutas: z.array(z.string()),
 });
+type FormValues = z.infer<typeof schema>;
 
-type VendedorForm = z.infer<typeof vendedorSchema>;
+// ── Component ─────────────────────────────────────────
+export default function VendedoresPage() {
+  const [vendedores, setVendedores] = useState<Vendedor[]>(INITIAL_VENDEDORES);
+  const [open, setOpen] = useState<boolean>(false);
+  const [selected, setSelected] = useState<Vendedor | null>(null);
+  const [search, setSearch] = useState("");
 
-export default function VendedoresList() {
-  const [vendedores, setVendedores] = useState<Vendedor[]>(initialVendedores);
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [canalFilter, setCanalFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [sheetOpen, setSheetOpen] = useState<boolean>(false);
-
-  const filteredData = vendedores.filter((v) => {
-    if (canalFilter !== "all" && !v.canales.includes(canalFilter)) return false;
-    if (statusFilter !== "all" && v.status !== statusFilter) return false;
-    return true;
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { canales: [], rutas: [] },
   });
 
-  const table = useReactTable({
-    data: filteredData, columns, state: { globalFilter }, onGlobalFilterChange: setGlobalFilter,
-    getCoreRowModel: getCoreRowModel(), getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(), initialState: { pagination: { pageSize: 20 } },
-  });
+  const watchedCanales = form.watch("canales");
+  const rutasDisponibles = RUTAS.filter((r) => watchedCanales.includes(r.canal));
 
-  const form = useForm<VendedorForm>({
-    resolver: zodResolver(vendedorSchema),
-    defaultValues: { nombre: "", codigo: "", canales: [], ruta: "", estado: "ACTIVO" },
-    mode: "onChange",
-  });
+  const filtered = vendedores.filter(
+    (v) =>
+      v.nombre.toLowerCase().includes(search.toLowerCase()) ||
+      v.codigo.toLowerCase().includes(search.toLowerCase())
+  );
 
-  const watchCanales = form.watch("canales");
-  const showRuta = watchCanales?.includes("Tradicional");
+  function openEdit(v: Vendedor) {
+    setSelected(v);
+    form.reset({ canales: v.canales, rutas: v.rutas });
+    setOpen(true);
+  }
 
-  const onSubmit = (data: VendedorForm) => {
-    setVendedores(prev => [...prev, {
-      id: prev.length + 1,
-      nombre: data.nombre,
-      codigo: data.codigo,
-      canales: data.canales,
-      ruta: data.ruta || null,
-      status: data.estado as "ACTIVO" | "INACTIVO",
-    }]);
-    toast.success("Vendedor creado exitosamente");
-    setSheetOpen(false);
-    form.reset();
-  };
+  function onSubmit(data: FormValues) {
+    if (!selected) return;
+    setVendedores((prev) =>
+      prev.map((v) =>
+        v.id === selected.id ? { ...v, canales: data.canales, rutas: data.rutas } : v
+      )
+    );
+    toast.success(`Vendedor ${selected.nombre} actualizado`);
+    setOpen(false);
+  }
 
-  const activeFilters = (canalFilter !== "all" ? 1 : 0) + (statusFilter !== "all" ? 1 : 0);
+  function handleCanalChange(
+    canal: string,
+    checked: boolean,
+    field: { value: string[]; onChange: (v: string[]) => void }
+  ) {
+    const newCanales = checked
+      ? [...field.value, canal]
+      : field.value.filter((c) => c !== canal);
+    field.onChange(newCanales);
+
+    const currentRutas = form.getValues("rutas");
+    const validRutas = currentRutas.filter((rId) => {
+      const ruta = RUTAS.find((r) => r.id === rId);
+      return ruta && newCanales.includes(ruta.canal);
+    });
+    form.setValue("rutas", validRutas);
+  }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Vendedores</h2>
-          <p className="text-sm text-muted-foreground">Gestión de vendedores y asignación de canales</p>
+          <p className="text-sm text-muted-foreground">
+            Gestión de canales y rutas asignadas. Para crear un vendedor, hazlo desde Usuarios.
+          </p>
         </div>
-        <Button onClick={() => setSheetOpen(true)}><Plus className="mr-2 h-4 w-4" />Nuevo Vendedor</Button>
       </div>
 
-      <div className="rounded-lg border border-border bg-card shadow-sm">
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <div className="relative w-80">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Buscar vendedor..." value={globalFilter} onChange={(e) => setGlobalFilter(e.target.value)} className="pl-9" />
-          </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Filter className="h-4 w-4" />Filtros
-                {activeFilters > 0 && <Badge className="ml-1 h-5 w-5 rounded-full bg-accent p-0 text-[10px] text-accent-foreground">{activeFilters}</Badge>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64 space-y-4" align="end">
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">Canal</label>
-                <Select value={canalFilter} onValueChange={setCanalFilter}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent position="popper" className="z-[9999]">
-                    <SelectItem value="all">Todos</SelectItem>
-                    {CANALES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">Estado</label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent position="popper" className="z-[9999]">
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="ACTIVO">Activo</SelectItem>
-                    <SelectItem value="INACTIVO">Inactivo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button variant="ghost" size="sm" className="w-full" onClick={() => { setCanalFilter("all"); setStatusFilter("all"); }}>Limpiar filtros</Button>
-            </PopoverContent>
-          </Popover>
-        </div>
+      {/* Search */}
+      <div className="relative w-80">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Buscar vendedor..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9"
+        />
+      </div>
 
+      {/* Table */}
+      <div className="rounded-lg border border-border bg-card shadow-sm">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((hg) => (
-              <TableRow key={hg.id} className="bg-muted/50 hover:bg-muted/50">
-                {hg.headers.map((h) => <TableHead key={h.id} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{flexRender(h.column.columnDef.header, h.getContext())}</TableHead>)}
-              </TableRow>
-            ))}
+            <TableRow className="bg-muted/50 hover:bg-muted/50">
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nombre</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Código</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Canales</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rutas</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Estado</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Acciones</TableHead>
+            </TableRow>
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.length === 0 ? (
-              <TableRow><TableCell colSpan={columns.length} className="h-32 text-center text-muted-foreground">No se encontraron vendedores.</TableCell></TableRow>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-muted/30">
-                  {row.getVisibleCells().map((cell) => <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>)}
-                </TableRow>
-              ))
-            )}
+            {filtered.map((v) => (
+              <TableRow key={v.id} className="hover:bg-muted/30">
+                <TableCell>
+                  <p className="font-medium text-foreground">{v.nombre}</p>
+                  <p className="text-xs text-muted-foreground">{v.email}</p>
+                </TableCell>
+                <TableCell>{v.codigo}</TableCell>
+                <TableCell>
+                  <div className="flex gap-1 flex-wrap">
+                    {v.canales.map((c) => (
+                      <Badge key={c} variant="secondary" className={CANAL_COLORS[c] || ""}>
+                        {c}
+                      </Badge>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {v.rutas.length === 0 ? (
+                    <span className="text-muted-foreground">Sin rutas</span>
+                  ) : (
+                    <div className="space-y-0.5">
+                      {v.rutas.map((rId) => {
+                        const ruta = RUTAS.find((r) => r.id === rId);
+                        return ruta ? (
+                          <p key={rId} className="text-sm">
+                            • {ruta.id} {ruta.nombre}
+                          </p>
+                        ) : null;
+                      })}
+                    </div>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={v.estado === "ACTIVO" ? "default" : "secondary"}
+                    className={
+                      v.estado === "ACTIVO"
+                        ? "bg-success/10 text-success border border-success/20"
+                        : "bg-destructive/10 text-destructive border border-destructive/20"
+                    }
+                  >
+                    {v.estado}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Button variant="outline" size="sm" onClick={() => openEdit(v)}>
+                    Editar
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
-
-        <div className="flex items-center justify-between border-t border-border px-4 py-3">
-          <p className="text-sm text-muted-foreground">{filteredData.length} vendedor{filteredData.length !== 1 ? "es" : ""}</p>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>Anterior</Button>
-            <span className="text-sm text-muted-foreground">Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}</span>
-            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>Siguiente</Button>
-          </div>
-        </div>
       </div>
 
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+      {/* Edit Sheet */}
+      <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="right" className="w-[480px] sm:max-w-[480px] overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>Nuevo Vendedor</SheetTitle>
-            <SheetDescription>Completa los datos del nuevo vendedor</SheetDescription>
+            <SheetTitle>Editar Vendedor</SheetTitle>
+            <SheetDescription>
+              {selected?.nombre} — {selected?.codigo}
+            </SheetDescription>
           </SheetHeader>
-          {sheetOpen && (
+
+          {/* Read-only info */}
+          <div className="mt-4 space-y-1 text-sm text-muted-foreground">
+            <p>Nombre: {selected?.nombre}</p>
+            <p>Email: {selected?.email}</p>
+            <p>Código: {selected?.codigo}</p>
+          </div>
+
+          {open && selected && (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
-                <FormField control={form.control} name="nombre" render={({ field }) => (
-                  <FormItem><FormLabel>Nombre completo *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <FormField control={form.control} name="codigo" render={({ field }) => (
-                  <FormItem><FormLabel>Código *</FormLabel><FormControl><Input placeholder="V-001" {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <FormField control={form.control} name="canales" render={() => (
-                  <FormItem>
-                    <FormLabel>Canal(es) *</FormLabel>
-                    <div className="space-y-2">
-                      {CANALES.map((canal) => (
-                        <div key={canal} className="flex items-center gap-2">
-                          <Checkbox
-                            checked={watchCanales?.includes(canal)}
-                            onCheckedChange={(checked) => {
-                              const current = form.getValues("canales");
-                              form.setValue("canales", checked ? [...current, canal] : current.filter((c) => c !== canal), { shouldValidate: true });
-                            }}
-                          />
-                          <Label className="text-sm font-normal">{canal}</Label>
-                        </div>
-                      ))}
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                {showRuta && (
-                  <FormField control={form.control} name="ruta" render={({ field }) => (
+                {/* Canales */}
+                <FormField
+                  control={form.control}
+                  name="canales"
+                  render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Ruta</FormLabel>
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Selecciona ruta" /></SelectTrigger></FormControl>
-                        <SelectContent position="popper" className="z-[9999]">
-                          {RUTAS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Canales *</FormLabel>
+                      <div className="space-y-2">
+                        {CANALES.map((canal) => (
+                          <div key={canal} className="flex items-center gap-2">
+                            <Checkbox
+                              checked={field.value.includes(canal)}
+                              onCheckedChange={(checked) =>
+                                handleCanalChange(canal, !!checked, field)
+                              }
+                            />
+                            <span className="text-sm">{canal}</span>
+                          </div>
+                        ))}
+                      </div>
                       <FormMessage />
                     </FormItem>
-                  )} />
+                  )}
+                />
+
+                {/* Rutas */}
+                {watchedCanales.length > 0 && (
+                  <FormField
+                    control={form.control}
+                    name="rutas"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Rutas asignadas</FormLabel>
+                        <p className="text-xs text-muted-foreground">
+                          Solo se muestran rutas de los canales seleccionados. Un vendedor puede tener múltiples rutas.
+                        </p>
+                        {rutasDisponibles.length === 0 ? (
+                          <p className="text-sm text-muted-foreground italic">
+                            No hay rutas disponibles para los canales seleccionados.
+                          </p>
+                        ) : (
+                          <div className="space-y-2 mt-2">
+                            {rutasDisponibles.map((ruta) => (
+                              <div key={ruta.id} className="flex items-center gap-2">
+                                <Checkbox
+                                  checked={field.value.includes(ruta.id)}
+                                  onCheckedChange={(checked) => {
+                                    const next = checked
+                                      ? [...field.value, ruta.id]
+                                      : field.value.filter((id) => id !== ruta.id);
+                                    field.onChange(next);
+                                  }}
+                                />
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm">
+                                    {ruta.id} — {ruta.nombre}
+                                  </span>
+                                  <Badge variant="secondary" className={CANAL_COLORS[ruta.canal] || ""}>
+                                    {ruta.canal}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
-                <FormField control={form.control} name="estado" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estado *</FormLabel>
-                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
-                      <SelectContent position="popper" className="z-[9999]">
-                        <SelectItem value="ACTIVO">ACTIVO</SelectItem>
-                        <SelectItem value="INACTIVO">INACTIVO</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <SheetFooter className="pt-4 gap-2">
-                  <Button type="button" variant="outline" onClick={() => setSheetOpen(false)}>Cancelar</Button>
-                  <Button type="submit" disabled={!form.formState.isValid}>Guardar</Button>
-                </SheetFooter>
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit">Guardar cambios</Button>
+                </div>
               </form>
             </Form>
           )}
