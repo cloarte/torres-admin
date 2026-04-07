@@ -141,6 +141,8 @@ export default function UsuariosList() {
 
   const activeFilters = (roleFilter !== "all" ? 1 : 0) + (statusFilter !== "all" ? 1 : 0);
 
+  console.log("[DEBUG] UsuariosPage rendered, sheetOpen:", sheetOpen);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -148,10 +150,27 @@ export default function UsuariosList() {
           <h2 className="text-2xl font-bold text-foreground">Usuarios</h2>
           <p className="text-sm text-muted-foreground">Gestión de usuarios y permisos del sistema</p>
         </div>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => setSheetOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nuevo Usuario
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            className="border-destructive text-destructive"
+            onClick={() => alert("TEST: onClick funciona")}
+          >
+            TEST CLICK
+          </Button>
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => {
+            try {
+              console.log("[DEBUG] Nuevo Usuario button clicked");
+              setSheetOpen(true);
+            } catch (err) {
+              console.error("Button click error:", err);
+              toast.error(`Error al abrir: ${err instanceof Error ? err.message : String(err)}`);
+            }
+          }}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nuevo Usuario
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-lg border border-border bg-card shadow-sm">
