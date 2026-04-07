@@ -88,7 +88,7 @@ type FormValues = z.infer<typeof schema>;
 
 // ── Component ─────────────────────────────────────────
 export default function ClientesPage() {
-  const [clientes, setClientes] = useState<Cliente[]>(INITIAL_CLIENTES);
+  const [clientes, setClientes] = useState<Cliente[]>(mockClientes);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Cliente | null>(null);
   const [search, setSearch] = useState("");
