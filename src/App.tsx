@@ -22,7 +22,6 @@ import DescuentosCondicionPage from "@/pages/pricing/DescuentosCondicionPage";
 import CotizacionesListPage from "@/pages/pricing/CotizacionesListPage";
 import CotizacionNuevaPage from "@/pages/pricing/CotizacionNuevaPage";
 import ReportesPreciosPage from "@/pages/pricing/ReportesPreciosPage";
-import SyncErpPage from "@/pages/pricing/SyncErpPage";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
