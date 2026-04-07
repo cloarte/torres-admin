@@ -120,7 +120,7 @@ export default function UsuariosList() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
   const filteredData = users.filter((u) => {
     if (roleFilter !== "all" && u.role !== roleFilter) return false;
