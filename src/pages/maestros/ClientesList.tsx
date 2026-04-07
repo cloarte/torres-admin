@@ -1,309 +1,304 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  useReactTable, getCoreRowModel, getFilteredRowModel, getPaginationRowModel,
-  flexRender, createColumnHelper,
-} from "@tanstack/react-table";
-import { Search, Plus, Filter, MoreHorizontal, Building2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { DeactivateDialog } from "@/components/maestros/DeactivateDialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-export interface Cliente {
+// ── Data ──────────────────────────────────────────────
+const CANALES = ["Corporativo", "Moderno", "Tradicional", "Directa"] as const;
+
+const CANAL_COLORS: Record<string, string> = {
+  Corporativo: "bg-purple-100 text-purple-700",
+  Moderno: "bg-blue-100 text-blue-700",
+  Tradicional: "bg-amber-100 text-amber-700",
+  Directa: "bg-green-100 text-green-700",
+};
+
+const CREDITO_LABELS: Record<string, string> = {
+  "0": "Sin crédito",
+  "15": "15 días",
+  "30": "30 días",
+  "60": "60 días",
+};
+
+type Cliente = {
   id: number;
   razonSocial: string;
   ruc: string;
   canal: string;
-  diasCredito: number;
-  portalAccess: boolean;
-  status: "ACTIVO" | "INACTIVO";
   direccion: string;
   telefono: string;
   email: string;
-  contactoNombre: string;
-  contactoCargo: string;
-  observaciones: string;
-  portalEmail?: string;
-  portalLastLogin?: string;
-}
+  diasCredito: string;
+  tienePortal: boolean;
+  estado: "ACTIVO" | "INACTIVO";
+};
 
-export const mockClientes: Cliente[] = [
-  { id: 1, razonSocial: "Supermercados Plaza", ruc: "20512345678", canal: "Moderno", diasCredito: 30, portalAccess: true, status: "ACTIVO", direccion: "Av. Javier Prado 1234, San Isidro", telefono: "01-4567890", email: "compras@plaza.pe", contactoNombre: "Ana Vargas", contactoCargo: "Jefe de Compras", observaciones: "", portalEmail: "compras@plaza.pe", portalLastLogin: "hace 3 horas" },
-  { id: 2, razonSocial: "Bodega San Martín", ruc: "10234567890", canal: "Tradicional", diasCredito: 0, portalAccess: false, status: "ACTIVO", direccion: "Jr. Huallaga 567, Cercado de Lima", telefono: "01-3456789", email: "bodega.sm@gmail.com", contactoNombre: "Carlos Ramos", contactoCargo: "Propietario", observaciones: "Atención solo por las mañanas" },
-  { id: 3, razonSocial: "Distribuidora Lima", ruc: "20387654321", canal: "Directa", diasCredito: 15, portalAccess: true, status: "ACTIVO", direccion: "Calle Los Olivos 890, Los Olivos", telefono: "01-5678901", email: "info@distlima.pe", contactoNombre: "Luis Pérez", contactoCargo: "Gerente General", observaciones: "", portalEmail: "info@distlima.pe", portalLastLogin: "hace 2 días" },
+const INITIAL_CLIENTES: Cliente[] = [
+  { id: 1, razonSocial: "Supermercados Plaza", ruc: "20512345678", canal: "Moderno", direccion: "Av. Javier Prado 1234", telefono: "01-4567890", email: "compras@plaza.com", diasCredito: "30", tienePortal: true, estado: "ACTIVO" },
+  { id: 2, razonSocial: "Bodega San Martín", ruc: "10234567890", canal: "Tradicional", direccion: "Jr. San Martín 456", telefono: "987654321", email: "", diasCredito: "0", tienePortal: false, estado: "ACTIVO" },
+  { id: 3, razonSocial: "Distribuidora Lima", ruc: "20387654321", canal: "Directa", direccion: "Av. Argentina 789", telefono: "01-3456789", email: "lima@distrib.com", diasCredito: "15", tienePortal: true, estado: "ACTIVO" },
 ];
 
-const CANALES = ["Corporativo", "Moderno", "Tradicional", "Directa"];
-
-const columnHelper = createColumnHelper<Cliente>();
-
-function ClienteActions({ cliente }: { cliente: Cliente }) {
-  const navigate = useNavigate();
-  const [showDeactivate, setShowDeactivate] = useState(false);
-  return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => navigate(`/maestros/clientes/${cliente.id}`)}>Ver ficha</DropdownMenuItem>
-          <DropdownMenuItem>Editar</DropdownMenuItem>
-          <DropdownMenuItem className="text-destructive" onClick={() => setShowDeactivate(true)}>Desactivar</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <DeactivateDialog open={showDeactivate} onOpenChange={setShowDeactivate}
-        title={`¿Desactivar a ${cliente.razonSocial}?`}
-        onConfirm={() => { toast.success("Cliente desactivado"); setShowDeactivate(false); }} />
-    </>
-  );
-}
-
-const columns = [
-  columnHelper.accessor("razonSocial", {
-    header: "Razón social",
-    cell: (info) => (
-      <div className="flex items-center gap-2">
-        <Building2 className="h-4 w-4 text-muted-foreground" />
-        <span className="font-medium text-foreground">{info.getValue()}</span>
-      </div>
-    ),
-  }),
-  columnHelper.accessor("ruc", { header: "RUC", cell: (info) => <span className="font-mono text-sm">{info.getValue()}</span> }),
-  columnHelper.accessor("canal", {
-    header: "Canal",
-    cell: (info) => <Badge variant="secondary">{info.getValue()}</Badge>,
-  }),
-  columnHelper.accessor("diasCredito", {
-    header: "Días crédito",
-    cell: (info) => <span className="text-sm">{info.getValue() === 0 ? "Sin crédito" : `${info.getValue()} días`}</span>,
-  }),
-  columnHelper.accessor("portalAccess", {
-    header: "Portal",
-    cell: (info) => (
-      <Badge className={info.getValue() ? "bg-success/10 text-success border border-success/20" : "bg-muted text-muted-foreground"}>
-        {info.getValue() ? "Sí" : "No"}
-      </Badge>
-    ),
-  }),
-  columnHelper.accessor("status", {
-    header: "Estado",
-    cell: (info) => (
-      <Badge className={info.getValue() === "ACTIVO" ? "bg-success/10 text-success border border-success/20" : "bg-destructive/10 text-destructive border border-destructive/20"}>
-        <span className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${info.getValue() === "ACTIVO" ? "bg-success" : "bg-destructive"}`} />
-        {info.getValue()}
-      </Badge>
-    ),
-  }),
-  columnHelper.display({ id: "actions", cell: ({ row }) => <ClienteActions cliente={row.original} /> }),
-];
-
-const clienteSchema = z.object({
-  razonSocial: z.string().min(1, "Requerido").max(200),
-  ruc: z.string().regex(/^\d{11}$/, "El RUC debe tener 11 dígitos"),
+// ── Schema ────────────────────────────────────────────
+const schema = z.object({
+  razonSocial: z.string().min(3, "Razón social requerida"),
+  ruc: z.string().length(11, "El RUC debe tener 11 dígitos").regex(/^\d+$/, "Solo números"),
   canal: z.string().min(1, "Selecciona un canal"),
-  direccion: z.string().max(300).optional().or(z.literal("")),
-  telefono: z.string().max(20).optional().or(z.literal("")),
-  email: z.string().email("Email inválido").optional().or(z.literal("")),
-  diasCredito: z.string().min(1, "Selecciona"),
-  estado: z.string().min(1, "Requerido"),
+  direccion: z.string().optional(),
+  telefono: z.string().optional(),
+  email: z.union([z.string().email("Email inválido"), z.literal("")]).optional(),
+  diasCredito: z.string().min(1, "Selecciona una opción"),
+  estado: z.enum(["ACTIVO", "INACTIVO"]),
 });
 
-type ClienteForm = z.infer<typeof clienteSchema>;
+type FormValues = z.infer<typeof schema>;
 
-export default function ClientesList() {
-  const [clientes, setClientes] = useState<Cliente[]>(mockClientes);
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [canalFilter, setCanalFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [creditoFilter, setCreditoFilter] = useState("all");
-  const [sheetOpen, setSheetOpen] = useState<boolean>(false);
+// ── Component ─────────────────────────────────────────
+export default function ClientesPage() {
+  const [clientes, setClientes] = useState<Cliente[]>(INITIAL_CLIENTES);
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Cliente | null>(null);
+  const [search, setSearch] = useState("");
 
-  const filteredData = clientes.filter((c) => {
-    if (canalFilter !== "all" && c.canal !== canalFilter) return false;
-    if (statusFilter !== "all" && c.status !== statusFilter) return false;
-    if (creditoFilter === "con" && c.diasCredito === 0) return false;
-    if (creditoFilter === "sin" && c.diasCredito > 0) return false;
-    return true;
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      razonSocial: "", ruc: "", canal: "", direccion: "",
+      telefono: "", email: "", diasCredito: "0", estado: "ACTIVO",
+    },
   });
 
-  const table = useReactTable({
-    data: filteredData, columns, state: { globalFilter }, onGlobalFilterChange: setGlobalFilter,
-    getCoreRowModel: getCoreRowModel(), getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(), initialState: { pagination: { pageSize: 20 } },
-  });
+  const filtered = clientes.filter(
+    (c) =>
+      c.razonSocial.toLowerCase().includes(search.toLowerCase()) ||
+      c.ruc.includes(search)
+  );
 
-  const form = useForm<ClienteForm>({
-    resolver: zodResolver(clienteSchema),
-    defaultValues: { razonSocial: "", ruc: "", canal: "", direccion: "", telefono: "", email: "", diasCredito: "0", estado: "ACTIVO" },
-    mode: "onChange",
-  });
+  function openNew() {
+    setEditing(null);
+    form.reset({
+      razonSocial: "", ruc: "", canal: "", direccion: "",
+      telefono: "", email: "", diasCredito: "0", estado: "ACTIVO",
+    });
+    setOpen(true);
+  }
 
-  const onSubmit = (data: ClienteForm) => {
-    setClientes(prev => [...prev, {
-      id: prev.length + 1,
-      razonSocial: data.razonSocial,
-      ruc: data.ruc,
-      canal: data.canal,
-      diasCredito: parseInt(data.diasCredito),
-      portalAccess: false,
-      status: data.estado as "ACTIVO" | "INACTIVO",
-      direccion: data.direccion || "",
-      telefono: data.telefono || "",
-      email: data.email || "",
-      contactoNombre: "",
-      contactoCargo: "",
-      observaciones: "",
-    }]);
-    toast.success("Cliente creado exitosamente");
-    setSheetOpen(false);
-    form.reset();
-  };
+  function openEdit(c: Cliente) {
+    setEditing(c);
+    form.reset({
+      razonSocial: c.razonSocial,
+      ruc: c.ruc,
+      canal: c.canal,
+      direccion: c.direccion,
+      telefono: c.telefono,
+      email: c.email,
+      diasCredito: c.diasCredito,
+      estado: c.estado,
+    });
+    setOpen(true);
+  }
 
-  const activeFilters = (canalFilter !== "all" ? 1 : 0) + (statusFilter !== "all" ? 1 : 0) + (creditoFilter !== "all" ? 1 : 0);
+  function onSubmit(data: FormValues) {
+    if (editing) {
+      setClientes((prev) =>
+        prev.map((c) =>
+          c.id === editing.id
+            ? { ...c, ...data, diasCredito: data.diasCredito, email: data.email ?? "" }
+            : c
+        )
+      );
+      toast.success("Cliente actualizado exitosamente");
+    } else {
+      const nuevo: Cliente = {
+        id: Date.now(),
+        razonSocial: data.razonSocial,
+        ruc: data.ruc,
+        canal: data.canal,
+        direccion: data.direccion ?? "",
+        telefono: data.telefono ?? "",
+        email: data.email ?? "",
+        diasCredito: data.diasCredito,
+        tienePortal: false,
+        estado: data.estado,
+      };
+      setClientes((prev) => [nuevo, ...prev]);
+      toast.success("Cliente creado exitosamente");
+    }
+    setOpen(false);
+  }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Clientes</h2>
           <p className="text-sm text-muted-foreground">Gestión de clientes y acceso al portal</p>
         </div>
-        <Button onClick={() => setSheetOpen(true)}><Plus className="mr-2 h-4 w-4" />Nuevo Cliente</Button>
+        <Button onClick={openNew}>+ Nuevo Cliente</Button>
       </div>
 
-      <div className="rounded-lg border border-border bg-card shadow-sm">
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <div className="relative w-80">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Buscar cliente..." value={globalFilter} onChange={(e) => setGlobalFilter(e.target.value)} className="pl-9" />
-          </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Filter className="h-4 w-4" />Filtros
-                {activeFilters > 0 && <Badge className="ml-1 h-5 w-5 rounded-full bg-accent p-0 text-[10px] text-accent-foreground">{activeFilters}</Badge>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64 space-y-4" align="end">
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">Canal</label>
-                <Select value={canalFilter} onValueChange={setCanalFilter}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent position="popper" className="z-[9999]">
-                    <SelectItem value="all">Todos</SelectItem>
-                    {CANALES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">Estado</label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent position="popper" className="z-[9999]">
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="ACTIVO">Activo</SelectItem>
-                    <SelectItem value="INACTIVO">Inactivo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">Crédito</label>
-                <Select value={creditoFilter} onValueChange={setCreditoFilter}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent position="popper" className="z-[9999]">
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="con">Con crédito</SelectItem>
-                    <SelectItem value="sin">Sin crédito</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button variant="ghost" size="sm" className="w-full" onClick={() => { setCanalFilter("all"); setStatusFilter("all"); setCreditoFilter("all"); }}>Limpiar filtros</Button>
-            </PopoverContent>
-          </Popover>
-        </div>
+      {/* Search */}
+      <div className="flex items-center gap-4">
+        <Input
+          placeholder="Buscar por razón social o RUC..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="max-w-sm"
+        />
+      </div>
 
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((hg) => (
-              <TableRow key={hg.id} className="bg-muted/50 hover:bg-muted/50">
-                {hg.headers.map((h) => <TableHead key={h.id} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{flexRender(h.column.columnDef.header, h.getContext())}</TableHead>)}
-              </TableRow>
+      {/* Table */}
+      <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border bg-muted/50">
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Razón Social</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">RUC</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Canal</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Días Crédito</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Portal</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Estado</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((c) => (
+              <tr key={c.id} className="border-b border-border hover:bg-muted/30">
+                <td className="px-4 py-3">
+                  <p className="font-medium">{c.razonSocial}</p>
+                  {c.email && <p className="text-xs text-muted-foreground">{c.email}</p>}
+                </td>
+                <td className="px-4 py-3 font-mono">{c.ruc}</td>
+                <td className="px-4 py-3">
+                  <Badge variant="outline" className={CANAL_COLORS[c.canal] || ""}>
+                    {c.canal}
+                  </Badge>
+                </td>
+                <td className="px-4 py-3">
+                  {CREDITO_LABELS[c.diasCredito] ?? c.diasCredito}
+                </td>
+                <td className="px-4 py-3">
+                  <Badge variant="outline" className={c.tienePortal ? "bg-blue-50 text-blue-700" : ""}>
+                    {c.tienePortal ? "Sí" : "No"}
+                  </Badge>
+                </td>
+                <td className="px-4 py-3">
+                  <Badge className={c.estado === "ACTIVO" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}>
+                    {c.estado}
+                  </Badge>
+                </td>
+                <td className="px-4 py-3">
+                  <Button variant="ghost" size="sm" onClick={() => openEdit(c)}>
+                    Editar
+                  </Button>
+                </td>
+              </tr>
             ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.length === 0 ? (
-              <TableRow><TableCell colSpan={columns.length} className="h-32 text-center text-muted-foreground">No se encontraron clientes.</TableCell></TableRow>
-            ) : table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="hover:bg-muted/30">
-                {row.getVisibleCells().map((cell) => <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>)}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                  No se encontraron clientes
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
 
-        <div className="flex items-center justify-between border-t border-border px-4 py-3">
-          <p className="text-sm text-muted-foreground">{filteredData.length} cliente{filteredData.length !== 1 ? "s" : ""}</p>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>Anterior</Button>
-            <span className="text-sm text-muted-foreground">Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}</span>
-            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>Siguiente</Button>
-          </div>
+        <div className="border-t border-border px-4 py-3">
+          <p className="text-sm text-muted-foreground">
+            {filtered.length} cliente{filtered.length !== 1 ? "s" : ""}
+          </p>
         </div>
       </div>
 
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-[520px] sm:max-w-[520px] overflow-y-auto">
+      {/* Sheet — Nuevo / Editar */}
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="right" className="w-[480px] sm:max-w-[480px] overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>Nuevo Cliente</SheetTitle>
-            <SheetDescription>Completa los datos del nuevo cliente</SheetDescription>
+            <SheetTitle>
+              {editing ? "Editar Cliente" : "Nuevo Cliente"}
+            </SheetTitle>
+            <SheetDescription>
+              {editing
+                ? `Modificando: ${editing.razonSocial}`
+                : "Completa los campos para registrar un nuevo cliente."}
+            </SheetDescription>
           </SheetHeader>
-          {sheetOpen && (
+
+          {open && (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField control={form.control} name="razonSocial" render={({ field }) => (
-                    <FormItem><FormLabel>Razón Social *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                  <FormField control={form.control} name="ruc" render={({ field }) => (
-                    <FormItem><FormLabel>RUC *</FormLabel><FormControl><Input {...field} maxLength={11} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                </div>
+                <FormField control={form.control} name="razonSocial" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Razón Social *</FormLabel>
+                    <FormControl><Input placeholder="Empresa S.A.C." {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="ruc" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>RUC *</FormLabel>
+                    <FormControl><Input placeholder="20512345678" maxLength={11} {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
                 <FormField control={form.control} name="canal" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Canal *</FormLabel>
                     <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Selecciona canal" /></SelectTrigger></FormControl>
-                      <SelectContent position="popper" className="z-[9999]">{CANALES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar canal..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent position="popper" className="z-[9999]">
+                        {CANALES.map((c) => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="direccion" render={({ field }) => (
-                  <FormItem><FormLabel>Dirección</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField control={form.control} name="telefono" render={({ field }) => (
-                    <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                  <FormField control={form.control} name="email" render={({ field }) => (
-                    <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                </div>
+
                 <FormField control={form.control} name="diasCredito" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Días de crédito</FormLabel>
+                    <FormLabel>Días de crédito *</FormLabel>
                     <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Selecciona" /></SelectTrigger></FormControl>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                      </FormControl>
                       <SelectContent position="popper" className="z-[9999]">
                         <SelectItem value="0">Sin crédito</SelectItem>
                         <SelectItem value="15">15 días</SelectItem>
@@ -314,23 +309,57 @@ export default function ClientesList() {
                     <FormMessage />
                   </FormItem>
                 )} />
+
+                <FormField control={form.control} name="direccion" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dirección</FormLabel>
+                    <FormControl><Input placeholder="Av. Principal 123" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="telefono" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Teléfono</FormLabel>
+                    <FormControl><Input placeholder="01-4567890" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="email" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl><Input placeholder="contacto@empresa.com" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
                 <FormField control={form.control} name="estado" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Estado *</FormLabel>
                     <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar..." />
+                        </SelectTrigger>
+                      </FormControl>
                       <SelectContent position="popper" className="z-[9999]">
-                        <SelectItem value="ACTIVO">ACTIVO</SelectItem>
-                        <SelectItem value="INACTIVO">INACTIVO</SelectItem>
+                        <SelectItem value="ACTIVO">Activo</SelectItem>
+                        <SelectItem value="INACTIVO">Inactivo</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )} />
-                <SheetFooter className="pt-4 gap-2">
-                  <Button type="button" variant="outline" onClick={() => setSheetOpen(false)}>Cancelar</Button>
-                  <Button type="submit" disabled={!form.formState.isValid}>Guardar</Button>
-                </SheetFooter>
+
+                <div className="flex justify-end gap-3 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit">
+                    {editing ? "Guardar cambios" : "Crear Cliente"}
+                  </Button>
+                </div>
               </form>
             </Form>
           )}
