@@ -115,7 +115,7 @@ export default function ProductosList() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [lineaFilter, setLineaFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
   const filteredData = productos.filter((p) => {
     if (lineaFilter !== "all" && p.linea !== lineaFilter) return false;
