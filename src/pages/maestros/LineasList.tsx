@@ -98,7 +98,7 @@ type LineaForm = z.infer<typeof lineaSchema>;
 export default function LineasList() {
   const [lineas, setLineas] = useState<Linea[]>(initialLineas);
   const [globalFilter, setGlobalFilter] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
   const table = useReactTable({
     data: lineas, columns, state: { globalFilter }, onGlobalFilterChange: setGlobalFilter,
