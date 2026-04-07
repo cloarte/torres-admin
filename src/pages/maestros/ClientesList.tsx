@@ -153,6 +153,13 @@ export default function ClientesPage() {
         diasCredito: data.diasCredito,
         tienePortal: false,
         estado: data.estado,
+        status: data.estado,
+        contactoNombre: "",
+        contactoCargo: "",
+        observaciones: "",
+        portalAccess: false,
+        portalEmail: "",
+        portalLastLogin: "",
       };
       setClientes((prev) => [nuevo, ...prev]);
       toast.success("Cliente creado exitosamente");
