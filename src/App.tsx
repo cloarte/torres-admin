@@ -55,7 +55,6 @@ const App = () => (
             <Route path="/pricing/cotizaciones" element={<CotizacionesListPage />} />
             <Route path="/pricing/cotizaciones/nueva" element={<CotizacionNuevaPage />} />
             <Route path="/pricing/reportes" element={<ReportesPreciosPage />} />
-            <Route path="/pricing/sync-erp" element={<SyncErpPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

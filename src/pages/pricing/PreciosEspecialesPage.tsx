@@ -8,22 +8,15 @@ import { Search, PlusCircle, Eye, Trash2, X, ChevronRight, Check } from "lucide-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter,
-} from "@/components/ui/sheet";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Popover, PopoverContent, PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
-} from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 /* ── Types ── */
 interface SpecialPriceClient {
@@ -43,7 +36,7 @@ interface ProductLine {
 }
 
 /* ── Mock ── */
-const mockClients: SpecialPriceClient[] = [
+const initialClients: SpecialPriceClient[] = [
   { id: 1, cliente: "Supermercados Plaza", canal: "Moderno", productos: 5, ultimaMod: "10/01/2026" },
   { id: 2, cliente: "Distribuidora Lima", canal: "Directa", productos: 2, ultimaMod: "05/01/2026" },
 ];
@@ -80,6 +73,7 @@ const col = createColumnHelper<SpecialPriceClient>();
 const fmt = (n: number) => `S/ ${n.toFixed(2)}`;
 
 export default function PreciosEspecialesPage() {
+  const [clients, setClients] = useState<SpecialPriceClient[]>(initialClients);
   const [search, setSearch] = useState("");
   const [wizardOpen, setWizardOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
@@ -89,7 +83,7 @@ export default function PreciosEspecialesPage() {
   const [step, setStep] = useState(1);
   const [clientOpen, setClientOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<typeof allClients[0] | null>(null);
-  const [wizardRows, setWizardRows] = useState<Array<{ productIdx: number; precio: string; motivo: string }>>([]);
+  const [wizardRows, setWizardRows] = useState<Array<{ productSku: string; precio: string; motivo: string }>>([]);
 
   const columns = [
     col.accessor("cliente", { header: "Cliente" }),
@@ -125,7 +119,10 @@ export default function PreciosEspecialesPage() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => toast.success("Precios especiales eliminados")}>
+                <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => {
+                  setClients(prev => prev.filter(c => c.id !== info.row.original.id));
+                  toast.success("Precios especiales eliminados");
+                }}>
                   Eliminar
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -136,10 +133,9 @@ export default function PreciosEspecialesPage() {
     }),
   ];
 
-  const filtered = mockClients.filter(c => {
+  const filtered = clients.filter(c => {
     if (!search) return true;
-    const q = search.toLowerCase();
-    return c.cliente.toLowerCase().includes(q);
+    return c.cliente.toLowerCase().includes(search.toLowerCase());
   });
 
   const table = useReactTable({
@@ -155,14 +151,15 @@ export default function PreciosEspecialesPage() {
     setStep(1);
     setSelectedClient(null);
     setWizardRows([]);
+    setClientOpen(false);
     setWizardOpen(true);
   };
 
   const addProductRow = () => {
-    setWizardRows([...wizardRows, { productIdx: -1, precio: "", motivo: "" }]);
+    setWizardRows([...wizardRows, { productSku: "", precio: "", motivo: "" }]);
   };
 
-  const updateRow = (idx: number, field: string, val: string | number) => {
+  const updateRow = (idx: number, field: string, val: string) => {
     const copy = [...wizardRows];
     (copy[idx] as any)[field] = val;
     setWizardRows(copy);
@@ -170,6 +167,24 @@ export default function PreciosEspecialesPage() {
 
   const removeRow = (idx: number) => {
     setWizardRows(wizardRows.filter((_, i) => i !== idx));
+  };
+
+  const saveWizard = () => {
+    if (!selectedClient) return;
+    const existing = clients.find(c => c.cliente === selectedClient.nombre);
+    if (existing) {
+      setClients(prev => prev.map(c => c.id === existing.id ? { ...c, productos: c.productos + wizardRows.length, ultimaMod: new Date().toLocaleDateString("es-PE") } : c));
+    } else {
+      setClients(prev => [...prev, {
+        id: prev.length + 1,
+        cliente: selectedClient.nombre,
+        canal: selectedClient.canal,
+        productos: wizardRows.length,
+        ultimaMod: new Date().toLocaleDateString("es-PE"),
+      }]);
+    }
+    toast.success(`Precios especiales guardados para ${selectedClient.nombre}.`);
+    setWizardOpen(false);
   };
 
   return (
@@ -224,10 +239,10 @@ export default function PreciosEspecialesPage() {
 
       {/* View Detail Sheet */}
       <Sheet open={viewOpen} onOpenChange={setViewOpen}>
-        <SheetContent className="sm:max-w-lg">
+        <SheetContent className="sm:max-w-lg" aria-describedby="view-detail-desc">
           <SheetHeader>
             <SheetTitle>Precios Especiales</SheetTitle>
-            <SheetDescription>{viewClient?.cliente} — Canal: {viewClient?.canal}</SheetDescription>
+            <SheetDescription id="view-detail-desc">{viewClient?.cliente} — Canal: {viewClient?.canal}</SheetDescription>
           </SheetHeader>
           <div className="mt-6">
             <Table>
@@ -240,17 +255,14 @@ export default function PreciosEspecialesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {detailProducts.slice(0, viewClient?.productos || 0).map((p, i) => {
-                  const diff = p.precioEspecial - p.precioCanal;
-                  return (
-                    <TableRow key={i} className="hover:bg-muted/30">
-                      <TableCell className="text-sm">{p.nombre}</TableCell>
-                      <TableCell className="text-right font-mono tabular-nums text-muted-foreground">{fmt(p.precioCanal)}</TableCell>
-                      <TableCell className="text-right font-mono tabular-nums font-semibold">{fmt(p.precioEspecial)}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{p.motivo}</TableCell>
-                    </TableRow>
-                  );
-                })}
+                {detailProducts.slice(0, viewClient?.productos || 0).map((p, i) => (
+                  <TableRow key={i} className="hover:bg-muted/30">
+                    <TableCell className="text-sm">{p.nombre}</TableCell>
+                    <TableCell className="text-right font-mono tabular-nums text-muted-foreground">{fmt(p.precioCanal)}</TableCell>
+                    <TableCell className="text-right font-mono tabular-nums font-semibold">{fmt(p.precioEspecial)}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{p.motivo}</TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </div>
@@ -262,10 +274,10 @@ export default function PreciosEspecialesPage() {
 
       {/* Wizard Sheet */}
       <Sheet open={wizardOpen} onOpenChange={setWizardOpen}>
-        <SheetContent className="sm:max-w-xl">
+        <SheetContent className="sm:max-w-xl" aria-describedby="wizard-desc">
           <SheetHeader>
             <SheetTitle>Agregar Precio Especial</SheetTitle>
-            <SheetDescription>
+            <SheetDescription id="wizard-desc">
               <div className="flex items-center gap-2 mt-2">
                 <span className={`flex items-center gap-1.5 text-xs font-medium ${step === 1 ? "text-accent" : "text-muted-foreground"}`}>
                   {step > 1 ? <Check className="h-3.5 w-3.5 text-success" /> : <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-foreground text-[10px]">1</span>}
@@ -320,19 +332,21 @@ export default function PreciosEspecialesPage() {
               <Button variant="outline" size="sm" onClick={addProductRow}>+ Agregar Producto</Button>
               <div className="space-y-3">
                 {wizardRows.map((row, idx) => {
-                  const prod = row.productIdx >= 0 ? allProducts[row.productIdx] : null;
+                  const prod = allProducts.find(p => p.sku === row.productSku);
                   const diff = prod && row.precio ? parseFloat(row.precio) - prod.precioCanal : 0;
                   return (
                     <div key={idx} className="rounded-lg border border-border p-3 space-y-2">
                       <div className="flex items-center gap-2">
-                        <select
-                          className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                          value={row.productIdx}
-                          onChange={e => updateRow(idx, "productIdx", parseInt(e.target.value))}
-                        >
-                          <option value={-1}>Seleccionar producto...</option>
-                          {allProducts.map((p, pi) => <option key={pi} value={pi}>{p.sku} — {p.nombre}</option>)}
-                        </select>
+                        <div className="flex-1">
+                          <Select value={row.productSku} onValueChange={(val) => updateRow(idx, "productSku", val)}>
+                            <SelectTrigger><SelectValue placeholder="Seleccionar producto..." /></SelectTrigger>
+                            <SelectContent position="popper" className="z-[9999]">
+                              {allProducts.map((p) => (
+                                <SelectItem key={p.sku} value={p.sku}>{p.sku} — {p.nombre}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeRow(idx)}>
                           <X className="h-4 w-4" />
                         </Button>
@@ -373,12 +387,7 @@ export default function PreciosEspecialesPage() {
             {step === 2 && (
               <>
                 <Button variant="outline" onClick={() => setStep(1)}>← Anterior</Button>
-                <Button disabled={wizardRows.length === 0} onClick={() => {
-                  toast.success(`Precios especiales guardados para ${selectedClient?.nombre}.`);
-                  setWizardOpen(false);
-                }}>
-                  Guardar Precios
-                </Button>
+                <Button disabled={wizardRows.length === 0} onClick={saveWizard}>Guardar Precios</Button>
               </>
             )}
           </SheetFooter>

@@ -2,43 +2,17 @@ import { useState } from "react";
 import { UserFormSheet } from "@/components/maestros/UserFormSheet";
 import { toast } from "sonner";
 import {
-  useReactTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  flexRender,
-  createColumnHelper,
+  useReactTable, getCoreRowModel, getFilteredRowModel, getPaginationRowModel,
+  flexRender, createColumnHelper,
 } from "@tanstack/react-table";
 import { Search, Plus, Filter, MoreHorizontal, Mail, Shield, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface User {
   id: number;
@@ -49,7 +23,7 @@ interface User {
   lastAccess: string;
 }
 
-const mockUsers: User[] = [
+const initialUsers: User[] = [
   { id: 1, name: "María García", email: "maria@torres.com", role: "ADMIN", status: "ACTIVO", lastAccess: "hace 2 horas" },
   { id: 2, name: "Juan López", email: "jlopez@torres.com", role: "VENDEDOR", status: "ACTIVO", lastAccess: "hace 1 día" },
   { id: 3, name: "Rosnelli Flores", email: "rosnelli@torres.com", role: "ALMACEN", status: "ACTIVO", lastAccess: "hace 3 horas" },
@@ -65,6 +39,8 @@ const roleColors: Record<string, string> = {
   ALMACEN: "bg-success text-success-foreground",
   CONSOLIDADOR: "bg-warning text-warning-foreground",
   INSPECTOR: "bg-muted text-muted-foreground",
+  GERENTE_GENERAL: "bg-primary text-primary-foreground",
+  CAJERO: "bg-muted text-muted-foreground",
 };
 
 const columns = [
@@ -140,12 +116,13 @@ const columns = [
 ];
 
 export default function UsuariosList() {
+  const [users, setUsers] = useState<User[]>(initialUsers);
   const [globalFilter, setGlobalFilter] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const filteredData = mockUsers.filter((u) => {
+  const filteredData = users.filter((u) => {
     if (roleFilter !== "all" && u.role !== roleFilter) return false;
     if (statusFilter !== "all" && u.status !== statusFilter) return false;
     return true;
@@ -166,7 +143,6 @@ export default function UsuariosList() {
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Usuarios</h2>
@@ -178,18 +154,11 @@ export default function UsuariosList() {
         </Button>
       </div>
 
-      {/* Card with table */}
       <div className="rounded-lg border border-border bg-card shadow-sm">
-        {/* Toolbar */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="relative w-80">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nombre o email..."
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              className="pl-9"
-            />
+            <Input placeholder="Buscar por nombre o email..." value={globalFilter} onChange={(e) => setGlobalFilter(e.target.value)} className="pl-9" />
           </div>
           <div className="flex items-center gap-2">
             <Popover>
@@ -198,9 +167,7 @@ export default function UsuariosList() {
                   <Filter className="h-4 w-4" />
                   Filtros
                   {activeFilters > 0 && (
-                    <Badge className="ml-1 h-5 w-5 rounded-full bg-accent p-0 text-[10px] text-accent-foreground">
-                      {activeFilters}
-                    </Badge>
+                    <Badge className="ml-1 h-5 w-5 rounded-full bg-accent p-0 text-[10px] text-accent-foreground">{activeFilters}</Badge>
                   )}
                 </Button>
               </PopoverTrigger>
@@ -209,7 +176,7 @@ export default function UsuariosList() {
                   <label className="text-xs font-medium text-muted-foreground">Rol</label>
                   <Select value={roleFilter} onValueChange={setRoleFilter}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent position="popper">
+                    <SelectContent position="popper" className="z-[9999]">
                       <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="ADMIN">Admin</SelectItem>
                       <SelectItem value="VENDEDOR">Vendedor</SelectItem>
@@ -223,19 +190,14 @@ export default function UsuariosList() {
                   <label className="text-xs font-medium text-muted-foreground">Estado</label>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent position="popper">
+                    <SelectContent position="popper" className="z-[9999]">
                       <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="ACTIVO">Activo</SelectItem>
                       <SelectItem value="INACTIVO">Inactivo</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => { setRoleFilter("all"); setStatusFilter("all"); }}
-                >
+                <Button variant="ghost" size="sm" className="w-full" onClick={() => { setRoleFilter("all"); setStatusFilter("all"); }}>
                   Limpiar filtros
                 </Button>
               </PopoverContent>
@@ -243,7 +205,6 @@ export default function UsuariosList() {
           </div>
         </div>
 
-        {/* Table */}
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (
@@ -259,17 +220,13 @@ export default function UsuariosList() {
           <TableBody>
             {table.getRowModel().rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-32 text-center text-muted-foreground">
-                  No se encontraron usuarios.
-                </TableCell>
+                <TableCell colSpan={columns.length} className="h-32 text-center text-muted-foreground">No se encontraron usuarios.</TableCell>
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} className="hover:bg-muted/30">
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                   ))}
                 </TableRow>
               ))
@@ -277,21 +234,12 @@ export default function UsuariosList() {
           </TableBody>
         </Table>
 
-        {/* Pagination */}
         <div className="flex items-center justify-between border-t border-border px-4 py-3">
-          <p className="text-sm text-muted-foreground">
-            {filteredData.length} usuario{filteredData.length !== 1 ? "s" : ""}
-          </p>
+          <p className="text-sm text-muted-foreground">{filteredData.length} usuario{filteredData.length !== 1 ? "s" : ""}</p>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-              Anterior
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
-            </span>
-            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-              Siguiente
-            </Button>
+            <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>Anterior</Button>
+            <span className="text-sm text-muted-foreground">Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}</span>
+            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>Siguiente</Button>
           </div>
         </div>
       </div>
@@ -299,7 +247,15 @@ export default function UsuariosList() {
       <UserFormSheet
         open={sheetOpen}
         onOpenChange={setSheetOpen}
-        onSave={() => {
+        onSave={(data) => {
+          setUsers(prev => [...prev, {
+            id: prev.length + 1,
+            name: data.nombre,
+            email: data.email,
+            role: data.rol,
+            status: data.estado as "ACTIVO" | "INACTIVO",
+            lastAccess: "ahora",
+          }]);
           toast.success("Usuario creado exitosamente");
         }}
       />

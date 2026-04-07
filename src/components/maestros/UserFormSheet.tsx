@@ -3,62 +3,27 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form";
 
-const ROLES = [
-  "Gerente General",
-  "Admin",
-  "Almacén",
-  "Consolidador",
-  "Vendedor",
-  "Inspector",
-  "Cajero",
-  "Aprobador Gastos",
-] as const;
+const ROLES = ["ADMIN", "GERENTE_GENERAL", "ALMACEN", "CONSOLIDADOR", "VENDEDOR", "INSPECTOR", "CAJERO"] as const;
+const ESTADOS = ["ACTIVO", "INACTIVO"] as const;
 
-const userSchema = z
-  .object({
-    nombres: z.string().min(1, "Requerido").max(100),
-    apellidos: z.string().min(1, "Requerido").max(100),
-    email: z.string().email("Email inválido").max(255),
-    codigoEmpleado: z.string().max(20).optional().or(z.literal("")),
-    rol: z.string().min(1, "Selecciona un rol"),
-    password: z
-      .string()
-      .min(8, "Mínimo 8 caracteres")
-      .regex(/[A-Z]/, "Debe incluir al menos 1 mayúscula")
-      .regex(/[0-9]/, "Debe incluir al menos 1 número"),
-    confirmPassword: z.string().min(1, "Confirma la contraseña"),
-    activo: z.boolean(),
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    message: "Las contraseñas no coinciden",
-    path: ["confirmPassword"],
-  });
+const userSchema = z.object({
+  nombre: z.string().min(3, "Mínimo 3 caracteres"),
+  email: z.string().email("Email inválido"),
+  password: z.string().min(8, "Mínimo 8 caracteres"),
+  rol: z.string().min(1, "Selecciona un rol"),
+  estado: z.string().min(1, "Selecciona un estado"),
+});
 
 type UserFormValues = z.infer<typeof userSchema>;
 
@@ -71,17 +36,8 @@ interface UserFormSheetProps {
 export function UserFormSheet({ open, onOpenChange, onSave }: UserFormSheetProps) {
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
-    defaultValues: {
-      nombres: "",
-      apellidos: "",
-      email: "",
-      codigoEmpleado: "",
-      rol: "",
-      password: "",
-      confirmPassword: "",
-      activo: true,
-    },
-    mode: "onBlur",
+    defaultValues: { nombre: "", email: "", password: "", rol: "", estado: "ACTIVO" },
+    mode: "onChange",
   });
 
   useEffect(() => {
@@ -102,120 +58,67 @@ export function UserFormSheet({ open, onOpenChange, onSave }: UserFormSheetProps
         </SheetHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="nombres"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombres *</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="apellidos"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Apellidos *</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField control={form.control} name="nombre" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nombre completo *</FormLabel>
+                <FormControl><Input {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email *</FormLabel>
-                  <FormControl><Input type="email" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormField control={form.control} name="email" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email *</FormLabel>
+                <FormControl><Input type="email" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
 
-            <FormField
-              control={form.control}
-              name="codigoEmpleado"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Código empleado</FormLabel>
-                  <FormControl><Input {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormField control={form.control} name="password" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contraseña *</FormLabel>
+                <FormControl><Input type="password" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
 
-            <FormField
-              control={form.control}
-              name="rol"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Rol *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger><SelectValue placeholder="Selecciona un rol" /></SelectTrigger>
-                    </FormControl>
-                    <SelectContent position="popper">
-                      {ROLES.map((r) => (
-                        <SelectItem key={r} value={r}>{r}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contraseña *</FormLabel>
-                  <FormControl><Input type="password" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirmar contraseña *</FormLabel>
-                  <FormControl><Input type="password" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="activo"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border border-border p-3">
-                  <FormLabel className="cursor-pointer">Activo</FormLabel>
+            <FormField control={form.control} name="rol" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Rol *</FormLabel>
+                <Select value={field.value ?? ""} onValueChange={field.onChange}>
                   <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    <SelectTrigger><SelectValue placeholder="Seleccionar rol..." /></SelectTrigger>
                   </FormControl>
-                </FormItem>
-              )}
-            />
+                  <SelectContent position="popper" className="z-[9999]">
+                    {ROLES.map((r) => (
+                      <SelectItem key={r} value={r}>{r}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )} />
+
+            <FormField control={form.control} name="estado" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estado *</FormLabel>
+                <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger><SelectValue placeholder="Seleccionar estado..." /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent position="popper" className="z-[9999]">
+                    {ESTADOS.map((e) => (
+                      <SelectItem key={e} value={e}>{e}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )} />
 
             <SheetFooter className="pt-4 gap-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={!form.formState.isValid}>
-                Guardar
-              </Button>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+              <Button type="submit" disabled={!form.formState.isValid}>Guardar</Button>
             </SheetFooter>
           </form>
         </Form>

@@ -1,7 +1,7 @@
 import { useLocation, Link } from "react-router-dom";
 import {
   Users, UserCheck, Package, Layers, Building2, Radio, Route, Heart, Settings,
-  DollarSign, Star, Percent, FileText, BarChart3, RefreshCw, ChevronDown
+  DollarSign, Star, Percent, FileText, BarChart3, ChevronDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";

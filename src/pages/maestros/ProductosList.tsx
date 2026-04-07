@@ -7,7 +7,6 @@ import { Search, Plus, Filter, MoreHorizontal, Package } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -27,15 +26,14 @@ interface Producto {
   nombre: string;
   linea: string;
   presentacion: string;
-  vidaUtil: number;
   status: "ACTIVO" | "INACTIVO";
 }
 
-const mockProductos: Producto[] = [
-  { id: 1, sku: "PAX-001", nombre: "Panetón Clásico 900g", linea: "Panetones", presentacion: "Caja x6", vidaUtil: 60, status: "ACTIVO" },
-  { id: 2, sku: "PAX-002", nombre: "Panetón Chocolate 900g", linea: "Panetones", presentacion: "Caja x6", vidaUtil: 60, status: "ACTIVO" },
-  { id: 3, sku: "MOL-001", nombre: "Pan de Molde Blanco 500g", linea: "Pan de Molde", presentacion: "Bolsa", vidaUtil: 15, status: "ACTIVO" },
-  { id: 4, sku: "EMP-001", nombre: "Empanada Pollo x12", linea: "Empanadas", presentacion: "Bandeja", vidaUtil: 7, status: "ACTIVO" },
+const initialProductos: Producto[] = [
+  { id: 1, sku: "PAX-001", nombre: "Panetón Clásico 900g", linea: "Panetones", presentacion: "Caja x6", status: "ACTIVO" },
+  { id: 2, sku: "PAX-002", nombre: "Panetón Chocolate 900g", linea: "Panetones", presentacion: "Caja x6", status: "ACTIVO" },
+  { id: 3, sku: "MOL-001", nombre: "Pan de Molde Blanco 500g", linea: "Pan de Molde", presentacion: "Bolsa", status: "ACTIVO" },
+  { id: 4, sku: "EMP-001", nombre: "Empanada Pollo x12", linea: "Empanadas", presentacion: "Bandeja", status: "ACTIVO" },
 ];
 
 const LINEAS = ["Panetones", "Pan de Molde", "Empanadas", "Tortas", "Kekos"];
@@ -68,10 +66,6 @@ const columns = [
     cell: (info) => <Badge variant="outline" className={`${lineaColors[info.getValue()] || ""} text-[11px]`}>{info.getValue()}</Badge>,
   }),
   columnHelper.accessor("presentacion", { header: "Presentación" }),
-  columnHelper.accessor("vidaUtil", {
-    header: "Vida útil",
-    cell: (info) => <span className="text-sm text-muted-foreground">{info.getValue()} días</span>,
-  }),
   columnHelper.accessor("status", {
     header: "Estado",
     cell: (info) => (
@@ -111,20 +105,19 @@ const productoSchema = z.object({
   descripcion: z.string().max(500).optional().or(z.literal("")),
   linea: z.string().min(1, "Selecciona una línea"),
   presentacion: z.string().min(1, "Requerido"),
-  unidadMedida: z.string().min(1, "Requerido"),
-  vidaUtil: z.coerce.number().min(0).optional(),
-  activo: z.boolean(),
+  estado: z.string().min(1, "Requerido"),
 });
 
 type ProductoForm = z.infer<typeof productoSchema>;
 
 export default function ProductosList() {
+  const [productos, setProductos] = useState<Producto[]>(initialProductos);
   const [globalFilter, setGlobalFilter] = useState("");
   const [lineaFilter, setLineaFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const filteredData = mockProductos.filter((p) => {
+  const filteredData = productos.filter((p) => {
     if (lineaFilter !== "all" && p.linea !== lineaFilter) return false;
     if (statusFilter !== "all" && p.status !== statusFilter) return false;
     return true;
@@ -138,12 +131,19 @@ export default function ProductosList() {
 
   const form = useForm<ProductoForm>({
     resolver: zodResolver(productoSchema),
-    defaultValues: { sku: "", nombre: "", descripcion: "", linea: "", presentacion: "", unidadMedida: "", vidaUtil: undefined, activo: true },
-    mode: "onBlur",
+    defaultValues: { sku: "", nombre: "", descripcion: "", linea: "", presentacion: "", estado: "ACTIVO" },
+    mode: "onChange",
   });
 
   const onSubmit = (data: ProductoForm) => {
-    console.log(data);
+    setProductos(prev => [...prev, {
+      id: prev.length + 1,
+      sku: data.sku,
+      nombre: data.nombre,
+      linea: data.linea,
+      presentacion: data.presentacion,
+      status: data.estado as "ACTIVO" | "INACTIVO",
+    }]);
     toast.success("Producto creado exitosamente");
     setSheetOpen(false);
     form.reset();
@@ -179,7 +179,7 @@ export default function ProductosList() {
                 <label className="text-xs font-medium text-muted-foreground">Línea</label>
                 <Select value={lineaFilter} onValueChange={setLineaFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                   <SelectContent position="popper">
+                  <SelectContent position="popper" className="z-[9999]">
                     <SelectItem value="all">Todas</SelectItem>
                     {LINEAS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
                   </SelectContent>
@@ -189,7 +189,7 @@ export default function ProductosList() {
                 <label className="text-xs font-medium text-muted-foreground">Estado</label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                   <SelectContent position="popper">
+                  <SelectContent position="popper" className="z-[9999]">
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="ACTIVO">Activo</SelectItem>
                     <SelectItem value="INACTIVO">Inactivo</SelectItem>
@@ -231,46 +231,46 @@ export default function ProductosList() {
       </div>
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent className="w-[480px] sm:max-w-[480px] overflow-y-auto">
-          <SheetHeader><SheetTitle>Nuevo Producto</SheetTitle></SheetHeader>
+        <SheetContent className="w-[480px] sm:max-w-[480px] overflow-y-auto" aria-describedby="producto-form-desc">
+          <SheetHeader>
+            <SheetTitle>Nuevo Producto</SheetTitle>
+            <p id="producto-form-desc" className="text-sm text-muted-foreground">Completa los datos del nuevo producto</p>
+          </SheetHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField control={form.control} name="sku" render={({ field }) => (
-                  <FormItem><FormLabel>Código SKU *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <FormField control={form.control} name="nombre" render={({ field }) => (
-                  <FormItem><FormLabel>Nombre *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-              </div>
+              <FormField control={form.control} name="sku" render={({ field }) => (
+                <FormItem><FormLabel>SKU *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
+              <FormField control={form.control} name="nombre" render={({ field }) => (
+                <FormItem><FormLabel>Nombre *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
               <FormField control={form.control} name="descripcion" render={({ field }) => (
                 <FormItem><FormLabel>Descripción</FormLabel><FormControl><Textarea {...field} rows={2} /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="linea" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Línea *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select value={field.value ?? ""} onValueChange={field.onChange}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Selecciona línea" /></SelectTrigger></FormControl>
-                    <SelectContent position="popper">{LINEAS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
+                    <SelectContent position="popper" className="z-[9999]">{LINEAS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )} />
-              <div className="grid grid-cols-2 gap-4">
-                <FormField control={form.control} name="presentacion" render={({ field }) => (
-                  <FormItem><FormLabel>Presentación *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <FormField control={form.control} name="unidadMedida" render={({ field }) => (
-                  <FormItem><FormLabel>Unidad de medida *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-              </div>
-              <FormField control={form.control} name="vidaUtil" render={({ field }) => (
-                <FormItem><FormLabel>Vida útil (días)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+              <FormField control={form.control} name="presentacion" render={({ field }) => (
+                <FormItem><FormLabel>Presentación *</FormLabel><FormControl><Input placeholder="900g, x12 unidades..." {...field} /></FormControl><FormMessage /></FormItem>
               )} />
-              <FormField control={form.control} name="activo" render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border border-border p-3">
-                  <FormLabel className="cursor-pointer">Activo</FormLabel>
-                  <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+              <FormField control={form.control} name="estado" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado *</FormLabel>
+                  <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
+                    <SelectContent position="popper" className="z-[9999]">
+                      <SelectItem value="ACTIVO">ACTIVO</SelectItem>
+                      <SelectItem value="INACTIVO">INACTIVO</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
                 </FormItem>
               )} />
               <SheetFooter className="pt-4 gap-2">

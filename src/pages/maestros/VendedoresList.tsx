@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -31,13 +30,18 @@ interface Vendedor {
   status: "ACTIVO" | "INACTIVO";
 }
 
-const mockVendedores: Vendedor[] = [
-  { id: 1, nombre: "Juan López", codigo: "V-001", canales: ["Tradicional"], ruta: "Ruta LIM-01", status: "ACTIVO" },
+const initialVendedores: Vendedor[] = [
+  { id: 1, nombre: "Juan López", codigo: "V-001", canales: ["Tradicional"], ruta: "LIM-01 Miraflores-San Isidro", status: "ACTIVO" },
   { id: 2, nombre: "Pedro Soto", codigo: "V-002", canales: ["Moderno", "Corporativo"], ruta: null, status: "ACTIVO" },
-  { id: 3, nombre: "María Torres", codigo: "V-003", canales: ["Tradicional"], ruta: "Ruta PRV-01", status: "ACTIVO" },
+  { id: 3, nombre: "María Torres", codigo: "V-003", canales: ["Tradicional"], ruta: "PRV-01 Arequipa Centro", status: "ACTIVO" },
 ];
 
 const CANALES = ["Corporativo", "Moderno", "Tradicional", "Directa"];
+const RUTAS = [
+  "LIM-01 Miraflores-San Isidro",
+  "LIM-02 La Victoria-Cercado",
+  "PRV-01 Arequipa Centro",
+];
 
 const columnHelper = createColumnHelper<Vendedor>();
 const columns = [
@@ -50,9 +54,7 @@ const columns = [
     header: "Canales",
     cell: (info) => (
       <div className="flex gap-1 flex-wrap">
-        {info.getValue().map((c) => (
-          <Badge key={c} variant="secondary" className="text-[11px]">{c}</Badge>
-        ))}
+        {info.getValue().map((c) => <Badge key={c} variant="secondary" className="text-[11px]">{c}</Badge>)}
       </div>
     ),
   }),
@@ -98,21 +100,23 @@ function ActionsCell({ vendedor }: { vendedor: Vendedor }) {
 }
 
 const vendedorSchema = z.object({
-  usuario: z.string().min(1, "Selecciona un usuario"),
+  nombre: z.string().min(3, "Mínimo 3 caracteres"),
   codigo: z.string().min(1, "Requerido"),
   canales: z.array(z.string()).min(1, "Selecciona al menos un canal"),
   ruta: z.string().optional(),
+  estado: z.string().min(1, "Requerido"),
 });
 
 type VendedorForm = z.infer<typeof vendedorSchema>;
 
 export default function VendedoresList() {
+  const [vendedores, setVendedores] = useState<Vendedor[]>(initialVendedores);
   const [globalFilter, setGlobalFilter] = useState("");
   const [canalFilter, setCanalFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const filteredData = mockVendedores.filter((v) => {
+  const filteredData = vendedores.filter((v) => {
     if (canalFilter !== "all" && !v.canales.includes(canalFilter)) return false;
     if (statusFilter !== "all" && v.status !== statusFilter) return false;
     return true;
@@ -126,15 +130,22 @@ export default function VendedoresList() {
 
   const form = useForm<VendedorForm>({
     resolver: zodResolver(vendedorSchema),
-    defaultValues: { usuario: "", codigo: "", canales: [], ruta: "" },
-    mode: "onBlur",
+    defaultValues: { nombre: "", codigo: "", canales: [], ruta: "", estado: "ACTIVO" },
+    mode: "onChange",
   });
 
   const watchCanales = form.watch("canales");
   const showRuta = watchCanales?.includes("Tradicional");
 
   const onSubmit = (data: VendedorForm) => {
-    console.log(data);
+    setVendedores(prev => [...prev, {
+      id: prev.length + 1,
+      nombre: data.nombre,
+      codigo: data.codigo,
+      canales: data.canales,
+      ruta: data.ruta || null,
+      status: data.estado as "ACTIVO" | "INACTIVO",
+    }]);
     toast.success("Vendedor creado exitosamente");
     setSheetOpen(false);
     form.reset();
@@ -170,7 +181,7 @@ export default function VendedoresList() {
                 <label className="text-xs font-medium text-muted-foreground">Canal</label>
                 <Select value={canalFilter} onValueChange={setCanalFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                   <SelectContent position="popper">
+                  <SelectContent position="popper" className="z-[9999]">
                     <SelectItem value="all">Todos</SelectItem>
                     {CANALES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
@@ -180,7 +191,7 @@ export default function VendedoresList() {
                 <label className="text-xs font-medium text-muted-foreground">Estado</label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                   <SelectContent position="popper">
+                  <SelectContent position="popper" className="z-[9999]">
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="ACTIVO">Activo</SelectItem>
                     <SelectItem value="INACTIVO">Inactivo</SelectItem>
@@ -224,32 +235,32 @@ export default function VendedoresList() {
       </div>
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent className="w-[480px] sm:max-w-[480px] overflow-y-auto">
-          <SheetHeader><SheetTitle>Nuevo Vendedor</SheetTitle></SheetHeader>
+        <SheetContent className="w-[480px] sm:max-w-[480px] overflow-y-auto" aria-describedby="vendedor-form-desc">
+          <SheetHeader>
+            <SheetTitle>Nuevo Vendedor</SheetTitle>
+            <p id="vendedor-form-desc" className="text-sm text-muted-foreground">Completa los datos del nuevo vendedor</p>
+          </SheetHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
-              <FormField control={form.control} name="usuario" render={({ field }) => (
+              <FormField control={form.control} name="nombre" render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Usuario (rol Vendedor) *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="Selecciona usuario" /></SelectTrigger></FormControl>
-                    <SelectContent position="popper">
-                      <SelectItem value="Juan López">Juan López</SelectItem>
-                      <SelectItem value="Pedro Soto">Pedro Soto</SelectItem>
-                      <SelectItem value="María Torres">María Torres</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Nombre completo *</FormLabel>
+                  <FormControl><Input {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
 
               <FormField control={form.control} name="codigo" render={({ field }) => (
-                <FormItem><FormLabel>Código vendedor *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem>
+                  <FormLabel>Código *</FormLabel>
+                  <FormControl><Input placeholder="V-001" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
               )} />
 
               <FormField control={form.control} name="canales" render={() => (
                 <FormItem>
-                  <FormLabel>Canales asignados *</FormLabel>
+                  <FormLabel>Canal(es) *</FormLabel>
                   <div className="space-y-2">
                     {CANALES.map((canal) => (
                       <div key={canal} className="flex items-center gap-2">
@@ -272,18 +283,30 @@ export default function VendedoresList() {
                 <FormField control={form.control} name="ruta" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Ruta</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
                       <FormControl><SelectTrigger><SelectValue placeholder="Selecciona ruta" /></SelectTrigger></FormControl>
-                      <SelectContent position="popper">
-                        <SelectItem value="LIM-01">Ruta LIM-01</SelectItem>
-                        <SelectItem value="LIM-02">Ruta LIM-02</SelectItem>
-                        <SelectItem value="PRV-01">Ruta PRV-01</SelectItem>
+                      <SelectContent position="popper" className="z-[9999]">
+                        {RUTAS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )} />
               )}
+
+              <FormField control={form.control} name="estado" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado *</FormLabel>
+                  <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
+                    <SelectContent position="popper" className="z-[9999]">
+                      <SelectItem value="ACTIVO">ACTIVO</SelectItem>
+                      <SelectItem value="INACTIVO">INACTIVO</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} />
 
               <SheetFooter className="pt-4 gap-2">
                 <Button type="button" variant="outline" onClick={() => setSheetOpen(false)}>Cancelar</Button>
