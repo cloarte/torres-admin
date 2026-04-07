@@ -24,6 +24,7 @@ import CotizacionNuevaPage from "@/pages/pricing/CotizacionNuevaPage";
 import ReportesPreciosPage from "@/pages/pricing/ReportesPreciosPage";
 import NotFound from "./pages/NotFound.tsx";
 
+
 const queryClient = new QueryClient();
 
 const App = () => (
