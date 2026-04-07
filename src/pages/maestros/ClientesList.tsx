@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { DeactivateDialog } from "@/components/maestros/DeactivateDialog";
 import { useForm } from "react-hook-form";
@@ -261,80 +261,78 @@ export default function ClientesList() {
         </div>
       </div>
 
-      <Sheet open={sheetOpen} onOpenChange={(v) => setSheetOpen(v)}>
-        <SheetContent className="w-[520px] sm:max-w-[520px] overflow-y-auto" aria-describedby="cliente-form-desc">
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent side="right" className="w-[520px] sm:max-w-[520px] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Nuevo Cliente</SheetTitle>
+            <SheetDescription>Completa los datos del nuevo cliente</SheetDescription>
+          </SheetHeader>
           {sheetOpen && (
-            <>
-              <SheetHeader>
-                <SheetTitle>Nuevo Cliente</SheetTitle>
-                <p id="cliente-form-desc" className="text-sm text-muted-foreground">Completa los datos del nuevo cliente</p>
-              </SheetHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="razonSocial" render={({ field }) => (
-                      <FormItem><FormLabel>Razón Social *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="ruc" render={({ field }) => (
-                      <FormItem><FormLabel>RUC *</FormLabel><FormControl><Input {...field} maxLength={11} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                  </div>
-                  <FormField control={form.control} name="canal" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Canal *</FormLabel>
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Selecciona canal" /></SelectTrigger></FormControl>
-                        <SelectContent position="popper" className="z-[9999]">{CANALES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField control={form.control} name="razonSocial" render={({ field }) => (
+                    <FormItem><FormLabel>Razón Social *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                   )} />
-                  <FormField control={form.control} name="direccion" render={({ field }) => (
-                    <FormItem><FormLabel>Dirección</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                  <FormField control={form.control} name="ruc" render={({ field }) => (
+                    <FormItem><FormLabel>RUC *</FormLabel><FormControl><Input {...field} maxLength={11} /></FormControl><FormMessage /></FormItem>
                   )} />
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="telefono" render={({ field }) => (
-                      <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="email" render={({ field }) => (
-                      <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                  </div>
-                  <FormField control={form.control} name="diasCredito" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Días de crédito</FormLabel>
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Selecciona" /></SelectTrigger></FormControl>
-                        <SelectContent position="popper" className="z-[9999]">
-                          <SelectItem value="0">Sin crédito</SelectItem>
-                          <SelectItem value="15">15 días</SelectItem>
-                          <SelectItem value="30">30 días</SelectItem>
-                          <SelectItem value="60">60 días</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
+                </div>
+                <FormField control={form.control} name="canal" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Canal *</FormLabel>
+                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Selecciona canal" /></SelectTrigger></FormControl>
+                      <SelectContent position="popper" className="z-[9999]">{CANALES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="direccion" render={({ field }) => (
+                  <FormItem><FormLabel>Dirección</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField control={form.control} name="telefono" render={({ field }) => (
+                    <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                   )} />
-                  <FormField control={form.control} name="estado" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado *</FormLabel>
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
-                        <SelectContent position="popper" className="z-[9999]">
-                          <SelectItem value="ACTIVO">ACTIVO</SelectItem>
-                          <SelectItem value="INACTIVO">INACTIVO</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
+                  <FormField control={form.control} name="email" render={({ field }) => (
+                    <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
                   )} />
-                  <SheetFooter className="pt-4 gap-2">
-                    <Button type="button" variant="outline" onClick={() => setSheetOpen(false)}>Cancelar</Button>
-                    <Button type="submit" disabled={!form.formState.isValid}>Guardar</Button>
-                  </SheetFooter>
-                </form>
-              </Form>
-            </>
+                </div>
+                <FormField control={form.control} name="diasCredito" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Días de crédito</FormLabel>
+                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Selecciona" /></SelectTrigger></FormControl>
+                      <SelectContent position="popper" className="z-[9999]">
+                        <SelectItem value="0">Sin crédito</SelectItem>
+                        <SelectItem value="15">15 días</SelectItem>
+                        <SelectItem value="30">30 días</SelectItem>
+                        <SelectItem value="60">60 días</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="estado" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Estado *</FormLabel>
+                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
+                      <SelectContent position="popper" className="z-[9999]">
+                        <SelectItem value="ACTIVO">ACTIVO</SelectItem>
+                        <SelectItem value="INACTIVO">INACTIVO</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <SheetFooter className="pt-4 gap-2">
+                  <Button type="button" variant="outline" onClick={() => setSheetOpen(false)}>Cancelar</Button>
+                  <Button type="submit" disabled={!form.formState.isValid}>Guardar</Button>
+                </SheetFooter>
+              </form>
+            </Form>
           )}
         </SheetContent>
       </Sheet>

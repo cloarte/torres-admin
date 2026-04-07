@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { DeactivateDialog } from "@/components/maestros/DeactivateDialog";
 import { useForm } from "react-hook-form";
@@ -230,58 +230,56 @@ export default function ProductosList() {
         </div>
       </div>
 
-      <Sheet open={sheetOpen} onOpenChange={(v) => setSheetOpen(v)}>
-        <SheetContent className="w-[480px] sm:max-w-[480px] overflow-y-auto" aria-describedby="producto-form-desc">
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent side="right" className="w-[480px] sm:max-w-[480px] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Nuevo Producto</SheetTitle>
+            <SheetDescription>Completa los datos del nuevo producto</SheetDescription>
+          </SheetHeader>
           {sheetOpen && (
-            <>
-              <SheetHeader>
-                <SheetTitle>Nuevo Producto</SheetTitle>
-                <p id="producto-form-desc" className="text-sm text-muted-foreground">Completa los datos del nuevo producto</p>
-              </SheetHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
-                  <FormField control={form.control} name="sku" render={({ field }) => (
-                    <FormItem><FormLabel>SKU *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                  <FormField control={form.control} name="nombre" render={({ field }) => (
-                    <FormItem><FormLabel>Nombre *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                  <FormField control={form.control} name="descripcion" render={({ field }) => (
-                    <FormItem><FormLabel>Descripción</FormLabel><FormControl><Textarea {...field} rows={2} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                  <FormField control={form.control} name="linea" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Línea *</FormLabel>
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Selecciona línea" /></SelectTrigger></FormControl>
-                        <SelectContent position="popper" className="z-[9999]">{LINEAS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="presentacion" render={({ field }) => (
-                    <FormItem><FormLabel>Presentación *</FormLabel><FormControl><Input placeholder="900g, x12 unidades..." {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                  <FormField control={form.control} name="estado" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado *</FormLabel>
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
-                        <SelectContent position="popper" className="z-[9999]">
-                          <SelectItem value="ACTIVO">ACTIVO</SelectItem>
-                          <SelectItem value="INACTIVO">INACTIVO</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <SheetFooter className="pt-4 gap-2">
-                    <Button type="button" variant="outline" onClick={() => setSheetOpen(false)}>Cancelar</Button>
-                    <Button type="submit" disabled={!form.formState.isValid}>Guardar</Button>
-                  </SheetFooter>
-                </form>
-              </Form>
-            </>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-5">
+                <FormField control={form.control} name="sku" render={({ field }) => (
+                  <FormItem><FormLabel>SKU *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="nombre" render={({ field }) => (
+                  <FormItem><FormLabel>Nombre *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="descripcion" render={({ field }) => (
+                  <FormItem><FormLabel>Descripción</FormLabel><FormControl><Textarea {...field} rows={2} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="linea" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Línea *</FormLabel>
+                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Selecciona línea" /></SelectTrigger></FormControl>
+                      <SelectContent position="popper" className="z-[9999]">{LINEAS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="presentacion" render={({ field }) => (
+                  <FormItem><FormLabel>Presentación *</FormLabel><FormControl><Input placeholder="900g, x12 unidades..." {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="estado" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Estado *</FormLabel>
+                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger></FormControl>
+                      <SelectContent position="popper" className="z-[9999]">
+                        <SelectItem value="ACTIVO">ACTIVO</SelectItem>
+                        <SelectItem value="INACTIVO">INACTIVO</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <SheetFooter className="pt-4 gap-2">
+                  <Button type="button" variant="outline" onClick={() => setSheetOpen(false)}>Cancelar</Button>
+                  <Button type="submit" disabled={!form.formState.isValid}>Guardar</Button>
+                </SheetFooter>
+              </form>
+            </Form>
           )}
         </SheetContent>
       </Sheet>
