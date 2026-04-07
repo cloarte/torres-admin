@@ -114,7 +114,7 @@ export default function VendedoresList() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [canalFilter, setCanalFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
   const filteredData = vendedores.filter((v) => {
     if (canalFilter !== "all" && !v.canales.includes(canalFilter)) return false;
