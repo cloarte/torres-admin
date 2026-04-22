@@ -99,12 +99,17 @@ export type Cliente = {
   portalAccess: boolean;
   portalEmail: string;
   portalLastLogin: string;
+  departamento: string;
+  provincia: string;
+  distrito: string;
+  geoX: string;
+  geoY: string;
 };
 
 export const mockClientes: Cliente[] = [
-  { id: 1, razonSocial: "Supermercados Plaza", ruc: "20512345678", canal: "Moderno", direccion: "Av. Javier Prado 1234", telefono: "01-4567890", email: "compras@plaza.com", diasCredito: "30", tienePortal: true, estado: "ACTIVO", status: "ACTIVO", contactoNombre: "Ana Pérez", contactoCargo: "Jefe de Compras", observaciones: "", portalAccess: true, portalEmail: "compras@plaza.com", portalLastLogin: "hace 2 días" },
-  { id: 2, razonSocial: "Bodega San Martín", ruc: "10234567890", canal: "Tradicional", direccion: "Jr. San Martín 456", telefono: "987654321", email: "", diasCredito: "0", tienePortal: false, estado: "ACTIVO", status: "ACTIVO", contactoNombre: "Carlos Ruiz", contactoCargo: "Propietario", observaciones: "", portalAccess: false, portalEmail: "", portalLastLogin: "" },
-  { id: 3, razonSocial: "Distribuidora Lima", ruc: "20387654321", canal: "Directa", direccion: "Av. Argentina 789", telefono: "01-3456789", email: "lima@distrib.com", diasCredito: "15", tienePortal: true, estado: "ACTIVO", status: "ACTIVO", contactoNombre: "Luis Torres", contactoCargo: "Gerente", observaciones: "", portalAccess: true, portalEmail: "lima@distrib.com", portalLastLogin: "hace 5 días" },
+  { id: 1, razonSocial: "Supermercados Plaza", ruc: "20512345678", canal: "Moderno", direccion: "Av. Javier Prado 1234", telefono: "01-4567890", email: "compras@plaza.com", diasCredito: "30", tienePortal: true, estado: "ACTIVO", status: "ACTIVO", contactoNombre: "Ana Pérez", contactoCargo: "Jefe de Compras", observaciones: "", portalAccess: true, portalEmail: "compras@plaza.com", portalLastLogin: "hace 2 días", departamento: "", provincia: "", distrito: "", geoX: "", geoY: "" },
+  { id: 2, razonSocial: "Bodega San Martín", ruc: "10234567890", canal: "Tradicional", direccion: "Jr. San Martín 456", telefono: "987654321", email: "", diasCredito: "0", tienePortal: false, estado: "ACTIVO", status: "ACTIVO", contactoNombre: "Carlos Ruiz", contactoCargo: "Propietario", observaciones: "", portalAccess: false, portalEmail: "", portalLastLogin: "", departamento: "", provincia: "", distrito: "", geoX: "", geoY: "" },
+  { id: 3, razonSocial: "Distribuidora Lima", ruc: "20387654321", canal: "Directa", direccion: "Av. Argentina 789", telefono: "01-3456789", email: "lima@distrib.com", diasCredito: "15", tienePortal: true, estado: "ACTIVO", status: "ACTIVO", contactoNombre: "Luis Torres", contactoCargo: "Gerente", observaciones: "", portalAccess: true, portalEmail: "lima@distrib.com", portalLastLogin: "hace 5 días", departamento: "", provincia: "", distrito: "", geoX: "", geoY: "" },
 ];
 
 // ── Schema ────────────────────────────────────────────
