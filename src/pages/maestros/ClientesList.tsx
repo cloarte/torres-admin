@@ -46,6 +46,41 @@ const CREDITO_LABELS: Record<string, string> = {
   "60": "60 días",
 };
 
+const GEO_PERU: Record<string, Record<string, string[]>> = {
+  "Lima": {
+    "Lima":      ["Miraflores","San Isidro","Surco","La Molina","San Borja","Barranco","Chorrillos","Lince","Pueblo Libre","Jesús María","Magdalena","San Miguel","Breña","Rímac","SMP","Independencia","Los Olivos","Comas","Carabayllo","Ate","Santa Anita","El Agustino","San Juan de Lurigancho","Villa El Salvador","Villa María del Triunfo","Lurín","Pachacámac"],
+    "Callao":    ["Callao","Bellavista","La Perla","La Punta","Carmen de la Legua","Ventanilla"],
+    "Huaral":    ["Huaral","Chancay","Aucallama"],
+    "Cañete":    ["San Vicente de Cañete","Imperial","Mala","Asia"],
+  },
+  "Arequipa": {
+    "Arequipa":  ["Arequipa","Alto Selva Alegre","Cayma","Cerro Colorado","Jacobo Hunter","José Luis Bustamante","Mariano Melgar","Miraflores","Paucarpata","Sachaca","Socabaya","Tiabaya","Uchumayo","Yanahuara"],
+    "Camaná":    ["Camaná","Samuel Pastor","Mariscal Cáceres","Nicolás de Pierola"],
+  },
+  "La Libertad": {
+    "Trujillo":  ["Trujillo","El Porvenir","Florencia de Mora","Huanchaco","La Esperanza","Laredo","Moche","Salaverry","Simbal","Víctor Larco Herrera"],
+    "Ascope":    ["Ascope","Chicama","Chocope","Magdalena de Cao","Paiján","Rázuri","Santiago de Cao"],
+  },
+  "Piura": {
+    "Piura":     ["Piura","Castilla","Catacaos","Cura Mori","El Tallan","La Arena","La Unión","Las Lomas","Tambo Grande","Veintiséis de Octubre"],
+    "Sullana":   ["Sullana","Bellavista","Ignacio Escudero","Lancones","Marcavelica","Miguel Checa","Querecotillo","Salitral"],
+  },
+  "Cusco": {
+    "Cusco":     ["Cusco","Ccorca","Poroy","San Jerónimo","San Sebastián","Santiago","Saylla","Wanchaq"],
+    "Urubamba":  ["Urubamba","Chinchero","Huayllabamba","Machupicchu","Maras","Ollantaytambo","Yucay"],
+  },
+  "Junín": {
+    "Huancayo":  ["Huancayo","Carhuacallanga","Chacapampa","Chicche","Chilca","Chongos Alto","Chupuro","Colca","Cullhuas","El Tambo","Huacrapuquio","Hualhuas","Huancan","Huasicancha","Huayucachi","Ingenio","Pariahuanca","Pilcomayo","Pucará","Quichuay","Quilcas","San Agustín de Cajas","San Jerónimo de Tunán","Saño","Sapallanga","Sicaya","Santo Domingo de Acobamba","Viques"],
+  },
+  "Lambayeque": {
+    "Chiclayo":  ["Chiclayo","Chongoyape","Eten","Eten Puerto","José Leonardo Ortiz","La Victoria","Lagunas","Monsefú","Nueva Arica","Oyotún","Picsi","Pimentel","Reque","Santa Rosa","Saña","Cayaltí","Tumán","Pomalca","Pátapo","Zaña"],
+  },
+  "Ica": {
+    "Ica":       ["Ica","La Tinguiña","Los Aquijes","Ocucaje","Pachacútec","Parcona","Pueblo Nuevo","Salas","San José de los Molinos","San Juan Bautista","Santiago","Subtanjalla","Tate","Yauca del Rosario"],
+    "Pisco":     ["Pisco","Huancano","Humay","Independencia","Paracas","San Andrés","San Clemente","Túpac Amaru Inca"],
+  },
+};
+
 export type Cliente = {
   id: number;
   razonSocial: string;
@@ -64,12 +99,17 @@ export type Cliente = {
   portalAccess: boolean;
   portalEmail: string;
   portalLastLogin: string;
+  departamento: string;
+  provincia: string;
+  distrito: string;
+  geoX: string;
+  geoY: string;
 };
 
 export const mockClientes: Cliente[] = [
-  { id: 1, razonSocial: "Supermercados Plaza", ruc: "20512345678", canal: "Moderno", direccion: "Av. Javier Prado 1234", telefono: "01-4567890", email: "compras@plaza.com", diasCredito: "30", tienePortal: true, estado: "ACTIVO", status: "ACTIVO", contactoNombre: "Ana Pérez", contactoCargo: "Jefe de Compras", observaciones: "", portalAccess: true, portalEmail: "compras@plaza.com", portalLastLogin: "hace 2 días" },
-  { id: 2, razonSocial: "Bodega San Martín", ruc: "10234567890", canal: "Tradicional", direccion: "Jr. San Martín 456", telefono: "987654321", email: "", diasCredito: "0", tienePortal: false, estado: "ACTIVO", status: "ACTIVO", contactoNombre: "Carlos Ruiz", contactoCargo: "Propietario", observaciones: "", portalAccess: false, portalEmail: "", portalLastLogin: "" },
-  { id: 3, razonSocial: "Distribuidora Lima", ruc: "20387654321", canal: "Directa", direccion: "Av. Argentina 789", telefono: "01-3456789", email: "lima@distrib.com", diasCredito: "15", tienePortal: true, estado: "ACTIVO", status: "ACTIVO", contactoNombre: "Luis Torres", contactoCargo: "Gerente", observaciones: "", portalAccess: true, portalEmail: "lima@distrib.com", portalLastLogin: "hace 5 días" },
+  { id: 1, razonSocial: "Supermercados Plaza", ruc: "20512345678", canal: "Moderno", direccion: "Av. Javier Prado 1234", telefono: "01-4567890", email: "compras@plaza.com", diasCredito: "30", tienePortal: true, estado: "ACTIVO", status: "ACTIVO", contactoNombre: "Ana Pérez", contactoCargo: "Jefe de Compras", observaciones: "", portalAccess: true, portalEmail: "compras@plaza.com", portalLastLogin: "hace 2 días", departamento: "", provincia: "", distrito: "", geoX: "", geoY: "" },
+  { id: 2, razonSocial: "Bodega San Martín", ruc: "10234567890", canal: "Tradicional", direccion: "Jr. San Martín 456", telefono: "987654321", email: "", diasCredito: "0", tienePortal: false, estado: "ACTIVO", status: "ACTIVO", contactoNombre: "Carlos Ruiz", contactoCargo: "Propietario", observaciones: "", portalAccess: false, portalEmail: "", portalLastLogin: "", departamento: "", provincia: "", distrito: "", geoX: "", geoY: "" },
+  { id: 3, razonSocial: "Distribuidora Lima", ruc: "20387654321", canal: "Directa", direccion: "Av. Argentina 789", telefono: "01-3456789", email: "lima@distrib.com", diasCredito: "15", tienePortal: true, estado: "ACTIVO", status: "ACTIVO", contactoNombre: "Luis Torres", contactoCargo: "Gerente", observaciones: "", portalAccess: true, portalEmail: "lima@distrib.com", portalLastLogin: "hace 5 días", departamento: "", provincia: "", distrito: "", geoX: "", geoY: "" },
 ];
 
 // ── Schema ────────────────────────────────────────────
@@ -82,6 +122,11 @@ const schema = z.object({
   email: z.union([z.string().email("Email inválido"), z.literal("")]).optional(),
   diasCredito: z.string().min(1, "Selecciona una opción"),
   estado: z.enum(["ACTIVO", "INACTIVO"]),
+  departamento: z.string().optional(),
+  provincia: z.string().optional(),
+  distrito: z.string().optional(),
+  geoX: z.string().optional(),
+  geoY: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -98,6 +143,7 @@ export default function ClientesPage() {
     defaultValues: {
       razonSocial: "", ruc: "", canal: "", direccion: "",
       telefono: "", email: "", diasCredito: "0", estado: "ACTIVO",
+      departamento: "", provincia: "", distrito: "", geoX: "", geoY: "",
     },
   });
 
@@ -112,6 +158,7 @@ export default function ClientesPage() {
     form.reset({
       razonSocial: "", ruc: "", canal: "", direccion: "",
       telefono: "", email: "", diasCredito: "0", estado: "ACTIVO",
+      departamento: "", provincia: "", distrito: "", geoX: "", geoY: "",
     });
     setOpen(true);
   }
@@ -127,6 +174,11 @@ export default function ClientesPage() {
       email: c.email,
       diasCredito: c.diasCredito,
       estado: c.estado,
+      departamento: c.departamento,
+      provincia: c.provincia,
+      distrito: c.distrito,
+      geoX: c.geoX,
+      geoY: c.geoY,
     });
     setOpen(true);
   }
@@ -160,6 +212,11 @@ export default function ClientesPage() {
         portalAccess: false,
         portalEmail: "",
         portalLastLogin: "",
+        departamento: data.departamento ?? "",
+        provincia: data.provincia ?? "",
+        distrito: data.distrito ?? "",
+        geoX: data.geoX ?? "",
+        geoY: data.geoY ?? "",
       };
       setClientes((prev) => [nuevo, ...prev]);
       toast.success("Cliente creado exitosamente");
@@ -208,6 +265,11 @@ export default function ClientesPage() {
                 <td className="px-4 py-3">
                   <p className="font-medium">{c.razonSocial}</p>
                   {c.email && <p className="text-xs text-muted-foreground">{c.email}</p>}
+                  {c.distrito && (
+                    <div className="text-muted-foreground text-xs">
+                      📍 {c.distrito}{c.provincia ? `, ${c.provincia}` : ""}
+                    </div>
+                  )}
                 </td>
                 <td className="px-4 py-3 font-mono">{c.ruc}</td>
                 <td className="px-4 py-3">
@@ -331,6 +393,107 @@ export default function ClientesPage() {
                     <FormMessage />
                   </FormItem>
                 )} />
+
+                {/* Departamento */}
+                <FormField control={form.control} name="departamento" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Departamento</FormLabel>
+                    <Select
+                      value={field.value ?? ""}
+                      onValueChange={(val) => {
+                        field.onChange(val);
+                        form.setValue("provincia", "");
+                        form.setValue("distrito", "");
+                      }}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar departamento..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent position="popper" className="z-[9999]">
+                        {Object.keys(GEO_PERU).sort().map((dep) => (
+                          <SelectItem key={dep} value={dep}>{dep}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                {form.watch("departamento") && (
+                  <FormField control={form.control} name="provincia" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Provincia</FormLabel>
+                      <Select
+                        value={field.value ?? ""}
+                        onValueChange={(val) => {
+                          field.onChange(val);
+                          form.setValue("distrito", "");
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar provincia..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent position="popper" className="z-[9999]">
+                          {Object.keys(GEO_PERU[form.watch("departamento") ?? ""] ?? {}).sort().map((prov) => (
+                            <SelectItem key={prov} value={prov}>{prov}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                )}
+
+                {form.watch("provincia") && (
+                  <FormField control={form.control} name="distrito" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Distrito</FormLabel>
+                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar distrito..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent position="popper" className="z-[9999]">
+                          {(GEO_PERU[form.watch("departamento") ?? ""]?.[form.watch("provincia") ?? ""] ?? []).slice().sort().map((dist) => (
+                            <SelectItem key={dist} value={dist}>{dist}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                )}
+
+                {/* Georreferencia */}
+                <div className="space-y-2">
+                  <FormLabel className="text-sm font-medium">
+                    Georreferencia (coordenadas)
+                  </FormLabel>
+                  <p className="text-xs text-muted-foreground">
+                    Longitud (X) y Latitud (Y) en grados decimales. Ej: X = -77.0428, Y = -12.0464
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField control={form.control} name="geoX" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs text-muted-foreground">Longitud (X)</FormLabel>
+                        <FormControl><Input placeholder="-77.0428" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="geoY" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs text-muted-foreground">Latitud (Y)</FormLabel>
+                        <FormControl><Input placeholder="-12.0464" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+                </div>
 
                 <FormField control={form.control} name="telefono" render={({ field }) => (
                   <FormItem>
