@@ -46,6 +46,41 @@ const CREDITO_LABELS: Record<string, string> = {
   "60": "60 días",
 };
 
+const GEO_PERU: Record<string, Record<string, string[]>> = {
+  "Lima": {
+    "Lima":      ["Miraflores","San Isidro","Surco","La Molina","San Borja","Barranco","Chorrillos","Lince","Pueblo Libre","Jesús María","Magdalena","San Miguel","Breña","Rímac","SMP","Independencia","Los Olivos","Comas","Carabayllo","Ate","Santa Anita","El Agustino","San Juan de Lurigancho","Villa El Salvador","Villa María del Triunfo","Lurín","Pachacámac"],
+    "Callao":    ["Callao","Bellavista","La Perla","La Punta","Carmen de la Legua","Ventanilla"],
+    "Huaral":    ["Huaral","Chancay","Aucallama"],
+    "Cañete":    ["San Vicente de Cañete","Imperial","Mala","Asia"],
+  },
+  "Arequipa": {
+    "Arequipa":  ["Arequipa","Alto Selva Alegre","Cayma","Cerro Colorado","Jacobo Hunter","José Luis Bustamante","Mariano Melgar","Miraflores","Paucarpata","Sachaca","Socabaya","Tiabaya","Uchumayo","Yanahuara"],
+    "Camaná":    ["Camaná","Samuel Pastor","Mariscal Cáceres","Nicolás de Pierola"],
+  },
+  "La Libertad": {
+    "Trujillo":  ["Trujillo","El Porvenir","Florencia de Mora","Huanchaco","La Esperanza","Laredo","Moche","Salaverry","Simbal","Víctor Larco Herrera"],
+    "Ascope":    ["Ascope","Chicama","Chocope","Magdalena de Cao","Paiján","Rázuri","Santiago de Cao"],
+  },
+  "Piura": {
+    "Piura":     ["Piura","Castilla","Catacaos","Cura Mori","El Tallan","La Arena","La Unión","Las Lomas","Tambo Grande","Veintiséis de Octubre"],
+    "Sullana":   ["Sullana","Bellavista","Ignacio Escudero","Lancones","Marcavelica","Miguel Checa","Querecotillo","Salitral"],
+  },
+  "Cusco": {
+    "Cusco":     ["Cusco","Ccorca","Poroy","San Jerónimo","San Sebastián","Santiago","Saylla","Wanchaq"],
+    "Urubamba":  ["Urubamba","Chinchero","Huayllabamba","Machupicchu","Maras","Ollantaytambo","Yucay"],
+  },
+  "Junín": {
+    "Huancayo":  ["Huancayo","Carhuacallanga","Chacapampa","Chicche","Chilca","Chongos Alto","Chupuro","Colca","Cullhuas","El Tambo","Huacrapuquio","Hualhuas","Huancan","Huasicancha","Huayucachi","Ingenio","Pariahuanca","Pilcomayo","Pucará","Quichuay","Quilcas","San Agustín de Cajas","San Jerónimo de Tunán","Saño","Sapallanga","Sicaya","Santo Domingo de Acobamba","Viques"],
+  },
+  "Lambayeque": {
+    "Chiclayo":  ["Chiclayo","Chongoyape","Eten","Eten Puerto","José Leonardo Ortiz","La Victoria","Lagunas","Monsefú","Nueva Arica","Oyotún","Picsi","Pimentel","Reque","Santa Rosa","Saña","Cayaltí","Tumán","Pomalca","Pátapo","Zaña"],
+  },
+  "Ica": {
+    "Ica":       ["Ica","La Tinguiña","Los Aquijes","Ocucaje","Pachacútec","Parcona","Pueblo Nuevo","Salas","San José de los Molinos","San Juan Bautista","Santiago","Subtanjalla","Tate","Yauca del Rosario"],
+    "Pisco":     ["Pisco","Huancano","Humay","Independencia","Paracas","San Andrés","San Clemente","Túpac Amaru Inca"],
+  },
+};
+
 export type Cliente = {
   id: number;
   razonSocial: string;
