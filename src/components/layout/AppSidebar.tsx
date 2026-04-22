@@ -26,7 +26,7 @@ const maestrosItems: MenuItem[] = [
 
 const pricingItems: MenuItem[] = [
   { title: "Precios por Canal", url: "/pricing/precios-canal", icon: DollarSign },
-  { title: "Precios Especiales", url: "/pricing/precios-especiales", icon: Star },
+  { title: "Precios por Cliente", url: "/pricing/precios-especiales", icon: Star },
   { title: "Descuentos Condición", url: "/pricing/descuentos", icon: Percent },
   { title: "Cotizaciones", url: "/pricing/cotizaciones", icon: FileText },
   { title: "Reportes", url: "/pricing/reportes", icon: BarChart3 },
