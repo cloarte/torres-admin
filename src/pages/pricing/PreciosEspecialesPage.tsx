@@ -191,7 +191,7 @@ export default function PreciosEspecialesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Precios Especiales por Cliente</h2>
+          <h2 className="text-2xl font-bold text-foreground">Precios por Cliente</h2>
           <p className="text-sm text-muted-foreground">Los clientes que no aparecen usan el precio de su canal.</p>
         </div>
         <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={openWizard}>
