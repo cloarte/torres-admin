@@ -394,6 +394,107 @@ export default function ClientesPage() {
                   </FormItem>
                 )} />
 
+                {/* Departamento */}
+                <FormField control={form.control} name="departamento" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Departamento</FormLabel>
+                    <Select
+                      value={field.value ?? ""}
+                      onValueChange={(val) => {
+                        field.onChange(val);
+                        form.setValue("provincia", "");
+                        form.setValue("distrito", "");
+                      }}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar departamento..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent position="popper" className="z-[9999]">
+                        {Object.keys(GEO_PERU).sort().map((dep) => (
+                          <SelectItem key={dep} value={dep}>{dep}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                {form.watch("departamento") && (
+                  <FormField control={form.control} name="provincia" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Provincia</FormLabel>
+                      <Select
+                        value={field.value ?? ""}
+                        onValueChange={(val) => {
+                          field.onChange(val);
+                          form.setValue("distrito", "");
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar provincia..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent position="popper" className="z-[9999]">
+                          {Object.keys(GEO_PERU[form.watch("departamento") ?? ""] ?? {}).sort().map((prov) => (
+                            <SelectItem key={prov} value={prov}>{prov}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                )}
+
+                {form.watch("provincia") && (
+                  <FormField control={form.control} name="distrito" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Distrito</FormLabel>
+                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar distrito..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent position="popper" className="z-[9999]">
+                          {(GEO_PERU[form.watch("departamento") ?? ""]?.[form.watch("provincia") ?? ""] ?? []).slice().sort().map((dist) => (
+                            <SelectItem key={dist} value={dist}>{dist}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                )}
+
+                {/* Georreferencia */}
+                <div className="space-y-2">
+                  <FormLabel className="text-sm font-medium">
+                    Georreferencia (coordenadas)
+                  </FormLabel>
+                  <p className="text-xs text-muted-foreground">
+                    Longitud (X) y Latitud (Y) en grados decimales. Ej: X = -77.0428, Y = -12.0464
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField control={form.control} name="geoX" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs text-muted-foreground">Longitud (X)</FormLabel>
+                        <FormControl><Input placeholder="-77.0428" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="geoY" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs text-muted-foreground">Latitud (Y)</FormLabel>
+                        <FormControl><Input placeholder="-12.0464" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+                </div>
+
                 <FormField control={form.control} name="telefono" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Teléfono</FormLabel>
