@@ -143,6 +143,7 @@ export default function ClientesPage() {
     defaultValues: {
       razonSocial: "", ruc: "", canal: "", direccion: "",
       telefono: "", email: "", diasCredito: "0", estado: "ACTIVO",
+      departamento: "", provincia: "", distrito: "", geoX: "", geoY: "",
     },
   });
 
@@ -157,6 +158,7 @@ export default function ClientesPage() {
     form.reset({
       razonSocial: "", ruc: "", canal: "", direccion: "",
       telefono: "", email: "", diasCredito: "0", estado: "ACTIVO",
+      departamento: "", provincia: "", distrito: "", geoX: "", geoY: "",
     });
     setOpen(true);
   }
@@ -172,6 +174,11 @@ export default function ClientesPage() {
       email: c.email,
       diasCredito: c.diasCredito,
       estado: c.estado,
+      departamento: c.departamento,
+      provincia: c.provincia,
+      distrito: c.distrito,
+      geoX: c.geoX,
+      geoY: c.geoY,
     });
     setOpen(true);
   }
@@ -205,6 +212,11 @@ export default function ClientesPage() {
         portalAccess: false,
         portalEmail: "",
         portalLastLogin: "",
+        departamento: data.departamento ?? "",
+        provincia: data.provincia ?? "",
+        distrito: data.distrito ?? "",
+        geoX: data.geoX ?? "",
+        geoY: data.geoY ?? "",
       };
       setClientes((prev) => [nuevo, ...prev]);
       toast.success("Cliente creado exitosamente");
