@@ -122,6 +122,11 @@ const schema = z.object({
   email: z.union([z.string().email("Email inválido"), z.literal("")]).optional(),
   diasCredito: z.string().min(1, "Selecciona una opción"),
   estado: z.enum(["ACTIVO", "INACTIVO"]),
+  departamento: z.string().optional(),
+  provincia: z.string().optional(),
+  distrito: z.string().optional(),
+  geoX: z.string().optional(),
+  geoY: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
