@@ -265,6 +265,11 @@ export default function ClientesPage() {
                 <td className="px-4 py-3">
                   <p className="font-medium">{c.razonSocial}</p>
                   {c.email && <p className="text-xs text-muted-foreground">{c.email}</p>}
+                  {c.distrito && (
+                    <div className="text-muted-foreground text-xs">
+                      📍 {c.distrito}{c.provincia ? `, ${c.provincia}` : ""}
+                    </div>
+                  )}
                 </td>
                 <td className="px-4 py-3 font-mono">{c.ruc}</td>
                 <td className="px-4 py-3">
